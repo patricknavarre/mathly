@@ -49,6 +49,7 @@ import Dashboard from './pages/Dashboard';
 import Learn from './pages/Learn';
 import LongDivision from './components/games/LongDivision';
 import MultiplicationPractice from './components/games/MultiplicationPractice';
+import SpeedMath from './components/games/SpeedMath';
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
           <Route path="/learn" element={<Learn />} />
           <Route path="/learn/division/long" element={<LongDivision />} />
           <Route path="/learn/multiplication" element={<MultiplicationPractice />} />
+          <Route path="/learn/speed-math" element={<SpeedMath />} />
         </Routes>
       </Router>
     </ThemeProvider>
