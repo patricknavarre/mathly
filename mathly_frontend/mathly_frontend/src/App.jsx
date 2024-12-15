@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
+// Import fonts
+
 // Create a fun, kid-friendly theme
 const theme = createTheme({
   palette: {
@@ -20,7 +22,7 @@ const theme = createTheme({
     }
   },
   typography: {
-    fontFamily: '"Fredoka One", "Press Start 2P", "Roboto", sans-serif',
+    fontFamily: '"Fredoka One", "Roboto", sans-serif',
     h1: {
       fontWeight: 700,
       fontSize: '3.5rem',
@@ -49,8 +51,6 @@ import Dashboard from './pages/Dashboard';
 import Learn from './pages/Learn';
 import LongDivision from './components/games/LongDivision';
 import MultiplicationPractice from './components/games/MultiplicationPractice';
-import SpeedMath from './components/games/SpeedMath';
-import BrainTeasers from './components/games/BrainTeasers';
 
 function App() {
   return (
@@ -66,8 +66,6 @@ function App() {
           <Route path="/learn" element={<Learn />} />
           <Route path="/learn/division/long" element={<LongDivision />} />
           <Route path="/learn/multiplication" element={<MultiplicationPractice />} />
-          <Route path="/learn/speed-math" element={<SpeedMath />} />
-          <Route path="/learn/brain-teasers" element={<BrainTeasers />} />
         </Routes>
       </Router>
     </ThemeProvider>
