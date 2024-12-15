@@ -60,11 +60,11 @@ const Dashboard = () => {
       title: "Speed Math",
       description: "Test your quick thinking",
       icon: <Speed />,
-      path: "/learn/speed"
+      path: "/learn/speed-math"
     },
     {
       title: "Brain Teasers",
-      description: "Challenge your mind",
+      description: "Challenge your mind with word problems",
       icon: <Psychology />,
       path: "/learn/brain-teasers"
     }

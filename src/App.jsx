@@ -50,6 +50,7 @@ import Learn from './pages/Learn';
 import LongDivision from './components/games/LongDivision';
 import MultiplicationPractice from './components/games/MultiplicationPractice';
 import SpeedMath from './components/games/SpeedMath';
+import BrainTeasers from './components/games/BrainTeasers';
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
           <Route path="/learn/division/long" element={<LongDivision />} />
           <Route path="/learn/multiplication" element={<MultiplicationPractice />} />
           <Route path="/learn/speed-math" element={<SpeedMath />} />
+          <Route path="/learn/brain-teasers" element={<BrainTeasers />} />
         </Routes>
       </Router>
     </ThemeProvider>

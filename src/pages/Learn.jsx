@@ -37,6 +37,19 @@ const Learn = () => {
       ]
     },
     {
+      category: "Brain Teasers",
+      topics: [
+        {
+          title: "Word Problems",
+          description: "Challenge your problem-solving skills with engaging word problems!",
+          icon: <Psychology sx={{ fontSize: 40 }} />,
+          path: "/learn/brain-teasers",
+          colors: ['#9C27B0', '#BA68C8'],
+          level: "All Grades"
+        }
+      ]
+    },
+    {
       category: "Division",
       topics: [
         {
