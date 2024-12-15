@@ -1,0 +1,21 @@
+# 1. Create and enter the frontend directory if it doesn't exist
+mkdir -p mathly_frontend
+cd mathly_frontend
+
+# 2. Initialize a new Vite project (select React when prompted)
+npm create vite@latest .
+
+# 3. Install base dependencies
+npm install
+
+# 4. Install additional dependencies
+npm install @mui/material @mui/icons-material @emotion/react @emotion/styled react-router-dom axios @mui/lab lottie-react framer-motion canvas-confetti @fontsource/fredoka-one @fontsource/press-start-2p @fireworks-js/react
+
+# 5. Start the development server
+npm run dev
+
+cd mathly_backend
+npx express-generator --no-view
+npm install
+npm install mongoose dotenv cors jsonwebtoken bcryptjs
+npm start
