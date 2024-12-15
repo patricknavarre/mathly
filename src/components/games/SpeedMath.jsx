@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Box, 
   Container, 
@@ -228,7 +228,7 @@ const SpeedMath = () => {
   const [hintsRemaining, setHintsRemaining] = useState(3);
   const timerRef = useRef(null);
 
-  const generateProblem = (level) => {
+  const generateProblem = useCallback((level) => {
     const { operations, numberRange } = DIFFICULTY_LEVELS[level];
     const operation = operations[Math.floor(Math.random() * operations.length)];
     let num1, num2, answer;
@@ -251,6 +251,7 @@ const SpeedMath = () => {
           break;
         case '/':
           // Ensure clean division
+          num2 = Math.max(2, Math.min(10, num2)); // Limit divisor range
           answer = num1;
           num1 = answer * num2;
           break;
@@ -263,9 +264,9 @@ const SpeedMath = () => {
       operation,
       answer
     };
-  };
+  }, []);
 
-  const startGame = () => {
+  const startGame = useCallback(() => {
     setScore(0);
     setStreak(0);
     setTimeLeft(DIFFICULTY_LEVELS[difficulty].timeLimit);
@@ -273,7 +274,7 @@ const SpeedMath = () => {
     setProblemsCompleted(0);
     setHintsRemaining(3);
     setProblem(generateProblem(difficulty));
-  };
+  }, [difficulty, generateProblem]);
 
   useEffect(() => {
     if (isGameActive && timeLeft > 0) {
@@ -290,11 +291,15 @@ const SpeedMath = () => {
     }
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     };
-  }, [isGameActive]);
+  }, [isGameActive, timeLeft]);
 
-  const handleAnswer = (answer) => {
+  const handleAnswer = useCallback((answer) => {
+    if (!problem) return;
+
     const numAnswer = parseInt(answer);
     if (numAnswer === problem.answer) {
       // Show streak multiplier
@@ -328,7 +333,7 @@ const SpeedMath = () => {
         message: 'Not quite right. Try again! 💪'
       });
     }
-  };
+  }, [problem, difficulty, timeLeft, streak, generateProblem]);
 
   // Add keyboard support
   useEffect(() => {
@@ -356,7 +361,7 @@ const SpeedMath = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [userAnswer, isGameActive, hintsRemaining, showHint]);
+  }, [userAnswer, isGameActive, hintsRemaining, showHint, handleAnswer]);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
