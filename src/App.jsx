@@ -1,9 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
-// Import fonts
-import '@fontsource/press-start-2p';
-
 // Create a fun, kid-friendly theme
 const theme = createTheme({
   palette: {
@@ -23,7 +20,7 @@ const theme = createTheme({
     }
   },
   typography: {
-    fontFamily: '"Fredoka One", "Roboto", sans-serif',
+    fontFamily: '"Fredoka One", "Press Start 2P", "Roboto", sans-serif',
     h1: {
       fontWeight: 700,
       fontSize: '3.5rem',
