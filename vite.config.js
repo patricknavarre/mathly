@@ -12,6 +12,20 @@ export default defineConfig({
         chunkFileNames: `assets/[name].[hash].js`,
         assetFileNames: `assets/[name].[hash].[ext]`
       }
+    },
+    chunkSizeWarningLimit: 600,
+    sourcemap: false,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
     }
+  },
+  server: {
+    port: 3000,
+    strictPort: true,
+    host: true
   }
 })
