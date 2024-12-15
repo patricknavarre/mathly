@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
 // Import fonts
-import '@fontsource/fredoka-one';
 import '@fontsource/press-start-2p';
 
 // Create a fun, kid-friendly theme
