@@ -24,6 +24,19 @@ const Learn = () => {
 
   const mathCategories = [
     {
+      category: "Quick Games",
+      topics: [
+        {
+          title: "Speed Math",
+          description: "Test your math skills against the clock!",
+          icon: <Speed sx={{ fontSize: 40 }} />,
+          path: "/learn/speed-math",
+          colors: ['#4CAF50', '#81C784'],
+          level: "All Grades"
+        }
+      ]
+    },
+    {
       category: "Division",
       topics: [
         {
@@ -33,18 +46,22 @@ const Learn = () => {
           path: "/learn/division/long",
           colors: ['#FFD93D', '#FFE074'],
           level: "Grade 4-5"
-        },
-        {
-          title: "Division Practice",
-          description: "Practice with different types of division problems",
-          icon: <EmojiEvents sx={{ fontSize: 40 }} />,
-          path: "/learn/division/practice",
-          colors: ['#FFE074', '#FFE8A8'],
-          level: "Grade 4-5"
         }
       ]
     },
-    // Add other categories later
+    {
+      category: "Multiplication",
+      topics: [
+        {
+          title: "Multiplication Practice",
+          description: "Practice multiplication with numbers up to 4 digits",
+          icon: <MultiplyIcon sx={{ fontSize: 40 }} />,
+          path: "/learn/multiplication",
+          colors: ['#FF6B6B', '#FF8E8E'],
+          level: "Grade 3-4"
+        }
+      ]
+    }
   ];
 
   return (
