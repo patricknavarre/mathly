@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer, Lightbulb, Speed } from '@mui/icons-material';
-import { playSound } from '../../assets/sounds';
 
 // Add NumberButton component for the number pad
 const NumberButton = ({ number, onClick }) => {
@@ -129,13 +128,11 @@ const SpeedMath = () => {
 
   const handleNumberClick = (number) => {
     if (userAnswer.length < 5) { // Limit answer length
-      playSound('buttonClick', 0.1);
       setUserAnswer(prev => prev + number);
     }
   };
 
   const handleBackspace = () => {
-    playSound('buttonClick', 0.1);
     setUserAnswer(prev => prev.slice(0, -1));
   };
 
@@ -199,19 +196,12 @@ const SpeedMath = () => {
 
     const numAnswer = parseInt(userAnswer);
     if (numAnswer === problem.answer) {
-      playSound('correct', 0.15);
       const basePoints = 100;
       const timeBonus = Math.floor((timeLeft / 60) * 50);
       const streakBonus = streak * 10;
       const points = basePoints + timeBonus + streakBonus;
 
-      setTimeLeft(prev => {
-        const newTime = Math.min(prev + 2, 60);
-        if (newTime > prev) {
-          playSound('timeBonus', 0.1);
-        }
-        return newTime;
-      }); // Cap at 60 seconds
+      setTimeLeft(prev => Math.min(prev + 2, 60)); // Cap at 60 seconds
       setShowTimeBonus(true);
 
       setScore(prev => prev + points);
@@ -228,7 +218,6 @@ const SpeedMath = () => {
         setShowHint(false);
       }, 1000);
     } else {
-      playSound('wrong', 0.15);
       setStreak(0);
       setShakeProblem(true);
       setTimeout(() => setShakeProblem(false), 500);
