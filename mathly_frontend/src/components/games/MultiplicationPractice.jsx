@@ -318,28 +318,43 @@ const MultiplicationPractice = () => {
   // Add keyboard support
   useEffect(() => {
     const handleKeyPress = (e) => {
-      // Handle number keys
-      if (/^[0-9]$/.test(e.key)) {
-        setUserAnswer(prev => prev + e.key);
-      }
-      // Handle backspace
-      else if (e.key === 'Backspace') {
-        setUserAnswer(prev => prev.slice(0, -1));
-      }
-      // Handle enter
-      else if (e.key === 'Enter' && userAnswer) {
-        handleAnswer(userAnswer);
-      }
-      // Handle hint
-      else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
-        setShowHint(true);
-        setHintsRemaining(prev => prev - 1);
+      // Only handle keyboard events on desktop
+      if (window.innerWidth > 768) {
+        // Handle number keys
+        if (/^[0-9]$/.test(e.key)) {
+          setUserAnswer(prev => prev + e.key);
+        }
+        // Handle backspace
+        else if (e.key === 'Backspace') {
+          setUserAnswer(prev => prev.slice(0, -1));
+        }
+        // Handle enter
+        else if (e.key === 'Enter' && userAnswer) {
+          handleAnswer(userAnswer);
+        }
+        // Handle hint
+        else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
+          handleShowHint();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [userAnswer, hintsRemaining, showHint]);
+
+  const handleInputChange = (e) => {
+    // Only allow numbers
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setUserAnswer(value);
+  };
+
+  const handleShowHint = () => {
+    if (hintsRemaining > 0 && !showHint) {
+      setShowHint(true);
+      setHintsRemaining(prev => prev - 1);
+    }
+  };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -402,12 +417,24 @@ const MultiplicationPractice = () => {
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
               <TextField
                 value={userAnswer}
-                inputProps={{ readOnly: true }}
+                onChange={handleInputChange}
+                type="number"
+                pattern="[0-9]*"
+                inputMode="numeric"
                 variant="outlined"
                 size="large"
                 sx={{ 
                   width: 200,
                   '& input': {
+                    fontSize: '2rem',
+                    textAlign: 'center',
+                    fontFamily: 'Fredoka One'
+                  }
+                }}
+                inputProps={{
+                  inputMode: 'numeric',
+                  pattern: '[0-9]*',
+                  style: {
                     fontSize: '2rem',
                     textAlign: 'center',
                     fontFamily: 'Fredoka One'
@@ -431,17 +458,14 @@ const MultiplicationPractice = () => {
             {/* Hint Button */}
             <Button
               variant="outlined"
-              startIcon={<Lightbulb />}
-              onClick={() => {
-                if (hintsRemaining > 0) {
-                  setShowHint(true);
-                  setHintsRemaining(prev => prev - 1);
-                }
-              }}
+              onClick={handleShowHint}
               disabled={hintsRemaining === 0 || showHint}
-              sx={{ mt: 2, fontFamily: 'Fredoka One' }}
+              sx={{ 
+                minWidth: '120px',
+                fontFamily: 'Fredoka One'
+              }}
             >
-              Hint (H) ({hintsRemaining})
+              Hint (H)
             </Button>
           </Box>
         )}
