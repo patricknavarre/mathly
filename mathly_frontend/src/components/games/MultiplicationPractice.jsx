@@ -3,8 +3,6 @@ import {
   Box, 
   Container, 
   Typography, 
-  TextField, 
-  Button, 
   Paper,
   Grid,
   LinearProgress
@@ -13,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Lightbulb, Rocket } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import NumberPad from '../NumberPad';
 
 // Add ClimbingCharacter component
 const ClimbingCharacter = ({ progress }) => {
@@ -272,70 +271,75 @@ const MultiplicationPractice = () => {
     return (problemsCompleted % PROBLEMS_PER_LEVEL) * (100 / PROBLEMS_PER_LEVEL);
   };
 
-  // Modify handleAnswer to include user info
-  const handleAnswer = (answer) => {
-    if (!currentUser) return; // Safety check
+  const handleNumberClick = (number) => {
+    setUserAnswer(prev => prev + number);
+  };
 
-    const numAnswer = parseInt(answer);
+  const handleBackspace = () => {
+    setUserAnswer(prev => prev.slice(0, -1));
+  };
+
+  const handleSubmit = () => {
+    if (!problem) return;
+
+    const numAnswer = parseInt(userAnswer);
     if (numAnswer === problem.answer) {
-      // Show streak multiplier
-      setShowStreakMultiplier(true);
-      setTimeout(() => setShowStreakMultiplier(false), 1000);
+      // Trigger confetti
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
 
-      const points = level * 10 * (streak + 1);
+      // Update score and streak
+      const streakMultiplier = Math.min(Math.floor(streak / 5) + 1, 5);
+      const points = 100 * streakMultiplier;
       setScore(prev => prev + points);
       setStreak(prev => prev + 1);
-      setProblemsCompleted(prev => prev + 1);
+      setShowStreakMultiplier(true);
+      setTimeout(() => setShowStreakMultiplier(false), 1500);
 
-      // Update user's score in the database
-      try {
-        fetch('/api/progress/update', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: currentUser.uid,
-            game: 'multiplication',
-            score: points,
-            level: level,
-            problemsCompleted: problemsCompleted + 1
-          })
-        });
-      } catch (error) {
-        console.error('Error updating progress:', error);
-      }
-
-      // Level up check
-      if (problemsCompleted > 0 && (problemsCompleted + 1) % PROBLEMS_PER_LEVEL === 0 && level < 4) {
-        setTimeout(() => {
-          setLevel(prev => prev + 1);
-          setFeedback({
-            type: 'success',
-            message: '🌟 Level Up! Ready for bigger numbers?'
-          });
-        }, 1000);
-      }
-
+      // Show success feedback
       setFeedback({
         type: 'success',
         message: `🎉 Correct! +${points} points!`
       });
 
-      // Generate new problem after delay
+      // Progress tracking
+      setProblemsCompleted(prev => {
+        const newCompleted = prev + 1;
+        if (newCompleted >= PROBLEMS_PER_LEVEL) {
+          setLevel(prevLevel => Math.min(prevLevel + 1, 4));
+          return 0;
+        }
+        return newCompleted;
+      });
+
+      // Reset for next problem
       setTimeout(() => {
         setProblem(generateProblem(level));
         setUserAnswer('');
         setFeedback(null);
         setShowHint(false);
         setWorkingSteps([]);
-      }, 2000);
+      }, 1500);
     } else {
       setStreak(0);
       setFeedback({
         type: 'error',
         message: 'Not quite right. Try again! 💪'
       });
+    }
+  };
+
+  const handleHint = () => {
+    if (hintsRemaining > 0) {
+      setShowHint(true);
+      setHintsRemaining(prev => prev - 1);
+      if (problem) {
+        const steps = generateHint(problem.num1, problem.num2);
+        setWorkingSteps(steps);
+      }
     }
   };
 
@@ -357,19 +361,6 @@ const MultiplicationPractice = () => {
       }
     }
   }, [currentUser]);
-
-  const handleInputChange = (e) => {
-    // Only allow numbers and limit length
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setUserAnswer(value);
-  };
-
-  const handleSubmit = (e) => {
-    e?.preventDefault(); // Make parameter optional
-    if (userAnswer) {
-      handleAnswer(userAnswer);
-    }
-  };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -423,79 +414,41 @@ const MultiplicationPractice = () => {
         </Box>
 
         {/* Problem Display */}
-        {problem && (
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography 
-              variant="h2" 
-              sx={{ 
-                fontFamily: 'Fredoka One',
-                mb: 2
-              }}
-            >
-              {problem.num1} × {problem.num2}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h2" sx={{ fontFamily: 'Fredoka One', mb: 2 }}>
+            {problem?.num1} × {problem?.num2}
+          </Typography>
+
+          {/* Answer Display */}
+          <Box sx={{ 
+            width: '200px',
+            height: '60px',
+            margin: '0 auto',
+            border: '2px solid',
+            borderColor: 'primary.main',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 3,
+            backgroundColor: 'white'
+          }}>
+            <Typography variant="h3" sx={{ fontFamily: 'Fredoka One' }}>
+              {userAnswer || ' '}
             </Typography>
-
-            {/* Input Area */}
-            <form onSubmit={handleSubmit}>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
-                <TextField
-                  value={userAnswer}
-                  onChange={handleInputChange}
-                  type="number"
-                  pattern="[0-9]*"
-                  inputMode="numeric"
-                  variant="outlined"
-                  size="large"
-                  autoComplete="off"
-                  sx={{ 
-                    width: 200,
-                    '& input': {
-                      fontSize: '2rem',
-                      textAlign: 'center',
-                      fontFamily: 'Fredoka One'
-                    }
-                  }}
-                  inputProps={{
-                    inputMode: 'numeric',
-                    pattern: '[0-9]*',
-                    style: {
-                      fontSize: '2rem',
-                      textAlign: 'center',
-                      fontFamily: 'Fredoka One'
-                    }
-                  }}
-                />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  sx={{ 
-                    py: 2,
-                    px: 4,
-                    fontFamily: 'Fredoka One'
-                  }}
-                >
-                  Check Answer
-                </Button>
-              </Box>
-            </form>
-
-            {/* Hint Button */}
-            <Button
-              variant="outlined"
-              onClick={() => {
-                if (hintsRemaining > 0) {
-                  setShowHint(true);
-                  setHintsRemaining(prev => prev - 1);
-                }
-              }}
-              disabled={hintsRemaining === 0 || showHint}
-              sx={{ mt: 2, fontFamily: 'Fredoka One' }}
-            >
-              Hint ({hintsRemaining} left)
-            </Button>
           </Box>
-        )}
+
+          {/* Number Pad */}
+          <NumberPad
+            onNumberClick={handleNumberClick}
+            onBackspace={handleBackspace}
+            onEnter={handleSubmit}
+            onHint={handleHint}
+            userAnswer={userAnswer}
+            hintsRemaining={hintsRemaining}
+            showHint={showHint}
+          />
+        </Box>
 
         {/* Feedback Display */}
         <AnimatePresence>

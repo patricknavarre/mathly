@@ -4,13 +4,15 @@ import {
   Container, 
   Typography, 
   Paper,
+  Grid,
+  LinearProgress,
   Button,
   Select,
-  MenuItem,
-  LinearProgress,
-  TextField
+  MenuItem
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
+import NumberPad from '../NumberPad';
 
 const DIFFICULTY_LEVELS = {
   EASY: {
@@ -58,240 +60,7 @@ const generateProblem = (difficulty) => {
   };
 };
 
-// Add Confetti component at the top
-const Confetti = ({ isActive }) => {
-  const confettiCount = 50;
-  
-  if (!isActive) return null;
-  
-  return (
-    <Box sx={{ 
-      position: 'absolute', 
-      top: 0, 
-      left: 0, 
-      right: 0, 
-      bottom: 0, 
-      pointerEvents: 'none',
-      zIndex: 10 
-    }}>
-      {[...Array(confettiCount)].map((_, i) => {
-        const randomX = Math.random() * 100;
-        const randomDelay = Math.random() * 0.5;
-        const randomDuration = 1 + Math.random() * 2;
-        const randomRotation = Math.random() * 360;
-        
-        return (
-          <motion.div
-            key={i}
-            initial={{ 
-              y: -20,
-              x: `${randomX}%`,
-              rotate: 0,
-              opacity: 1
-            }}
-            animate={{ 
-              y: '100vh',
-              x: [`${randomX}%`, `${randomX + (Math.random() * 20 - 10)}%`],
-              rotate: randomRotation,
-              opacity: 0
-            }}
-            transition={{ 
-              duration: randomDuration,
-              delay: randomDelay,
-              ease: [0.23, 0.51, 0.32, 0.95]
-            }}
-            style={{
-              position: 'absolute',
-              width: '10px',
-              height: '10px',
-              backgroundColor: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'][Math.floor(Math.random() * 5)],
-              borderRadius: Math.random() > 0.5 ? '50%' : '0%'
-            }}
-          />
-        );
-      })}
-    </Box>
-  );
-};
-
-// Add Streak Multiplier component
-const StreakMultiplier = ({ streak, isVisible }) => {
-  if (!isVisible || streak <= 1) return null;
-
-  return (
-    <motion.div
-      initial={{ scale: 0.5, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 1.5, opacity: 0 }}
-      style={{
-        position: 'absolute',
-        top: '-40px',
-        right: '-40px',
-        background: '#ff9800',
-        borderRadius: '50%',
-        padding: '12px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-      }}
-    >
-      <Typography sx={{ 
-        fontFamily: 'Fredoka One',
-        color: 'white',
-        fontSize: '1.2rem'
-      }}>
-        {streak}x
-      </Typography>
-    </motion.div>
-  );
-};
-
-// Add ClimbingCharacter component after other component definitions
-const ClimbingCharacter = ({ progress }) => {
-  const pathProgress = Math.min(Math.max(progress, 0), 100);
-  
-  return (
-    <Box sx={{ 
-      position: 'absolute',
-      right: 20,
-      top: 0,
-      bottom: 0,
-      width: 80,
-      pointerEvents: 'none',
-      zIndex: 1
-    }}>
-      {/* Mountain Path */}
-      <Box sx={{
-        position: 'absolute',
-        left: '50%',
-        top: '10%',
-        bottom: '10%',
-        width: 6,
-        bgcolor: '#e0e0e0',
-        borderRadius: 3,
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: -16,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 24,
-          height: 24,
-          bgcolor: '#f44336',
-          borderRadius: '50%',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-          zIndex: 2
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          bottom: -16,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 24,
-          height: 24,
-          bgcolor: '#4caf50',
-          borderRadius: '50%',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-          zIndex: 2
-        }
-      }} />
-
-      {/* Character */}
-      <motion.div
-        animate={{
-          top: `${90 - (pathProgress * 0.8)}%`,
-          rotate: [0, -5, 5, -5, 0],
-          scale: [1, 1.1, 1]
-        }}
-        transition={{
-          top: { type: "spring", stiffness: 100, damping: 20 },
-          rotate: { duration: 0.5, ease: "easeInOut", repeat: Infinity },
-          scale: { duration: 0.5, ease: "easeInOut", repeat: Infinity }
-        }}
-        style={{
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 48,
-          height: 48,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 3
-        }}
-      >
-        <Box sx={{
-          width: 40,
-          height: 40,
-          bgcolor: '#2196f3',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontFamily: 'Fredoka One',
-          fontSize: '1.5rem',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -10,
-            width: 8,
-            height: 8,
-            bgcolor: '#2196f3',
-            borderRadius: '50%',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }
-        }}>
-          🧗
-        </Box>
-      </motion.div>
-
-      {/* Progress Markers */}
-      {[0, 25, 50, 75, 100].map((marker) => (
-        <Box
-          key={marker}
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            top: `${90 - (marker * 0.8)}%`,
-            width: 12,
-            height: 12,
-            bgcolor: pathProgress >= marker ? '#2196f3' : '#e0e0e0',
-            borderRadius: '50%',
-            transition: 'background-color 0.3s ease',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              left: -8,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 6,
-              height: 2,
-              bgcolor: pathProgress >= marker ? '#2196f3' : '#e0e0e0',
-              transition: 'background-color 0.3s ease'
-            },
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              right: -8,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 6,
-              height: 2,
-              bgcolor: pathProgress >= marker ? '#2196f3' : '#e0e0e0',
-              transition: 'background-color 0.3s ease'
-            }
-          }}
-        />
-      ))}
-    </Box>
-  );
-};
-
 const LongDivision = () => {
-  // Game state
   const [problem, setProblem] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -305,26 +74,10 @@ const LongDivision = () => {
   const [problemsCompleted, setProblemsCompleted] = useState(0);
   const [hintsRemaining, setHintsRemaining] = useState(3);
   const [isGameComplete, setIsGameComplete] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const PROBLEMS_PER_LEVEL = 5;
 
-  // Initialize game
   useEffect(() => {
     startNewProblem();
   }, [difficulty]);
-
-  const handleInputChange = (e) => {
-    // Only allow numbers and limit length
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setUserAnswer(value);
-  };
-
-  const handleSubmit = (e) => {
-    e?.preventDefault(); // Make parameter optional
-    if (userAnswer) {
-      handleCheckAnswer();
-    }
-  };
 
   const startNewProblem = () => {
     const newProblem = generateProblem(difficulty);
@@ -376,7 +129,19 @@ const LongDivision = () => {
 
       steps.push({
         type: 'multiply',
-        instruction: `Multiply ${currentProblem.divisor} × ${quotientDigit} and subtract from ${currentValue}`,
+        instruction: `What is ${currentProblem.divisor} × ${quotientDigit}?`,
+        currentValue,
+        product,
+        remainder,
+        expectedAnswer: product.toString(),
+        quotientSoFar,
+        position,
+        hint: `${currentProblem.divisor} × ${quotientDigit} = ${product}`
+      });
+
+      steps.push({
+        type: 'subtract',
+        instruction: `What is ${currentValue} - ${product}?`,
         currentValue,
         product,
         remainder,
@@ -393,12 +158,20 @@ const LongDivision = () => {
     setProblem(prev => ({ ...prev, steps }));
   };
 
-  const handleCheckAnswer = () => {
+  const handleNumberClick = (number) => {
+    setUserAnswer(prev => prev + number);
+  };
+
+  const handleBackspace = () => {
+    setUserAnswer(prev => prev.slice(0, -1));
+  };
+
+  const handleSubmit = () => {
     if (!userAnswer || !problem?.steps[currentStep]) return;
 
     const currentStepData = problem.steps[currentStep];
     if (userAnswer === currentStepData.expectedAnswer) {
-      const basePoints = DIFFICULTY_LEVELS[difficulty].maxScore / (problem.steps.length / 2);
+      const basePoints = DIFFICULTY_LEVELS[difficulty].maxScore / problem.steps.length;
       const points = showHint ? Math.floor(basePoints / 2) : basePoints;
       
       setScore(prev => prev + points);
@@ -413,11 +186,11 @@ const LongDivision = () => {
         message: `Correct! +${points} points${streak > 0 ? ` (${streak + 1}x streak!)` : ''}`
       });
 
-      if (currentStepData.type === 'multiply') {
+      if (currentStepData.type === 'subtract') {
         setWorkingSteps(prev => [...prev, {
           ...currentStepData,
           value: userAnswer,
-          position: Math.floor(currentStep / 2)
+          position: Math.floor(currentStep / 3)
         }]);
       }
 
@@ -425,10 +198,6 @@ const LongDivision = () => {
       if (currentStep === problem.steps.length - 1) {
         setTimeout(() => {
           setIsGameComplete(true);
-          // Show confetti on problem completion
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 3000);
-          
           setFeedback({ 
             type: 'success', 
             message: `Problem Complete! +${Math.floor(basePoints * 1.5)} bonus points!` 
@@ -449,30 +218,17 @@ const LongDivision = () => {
     }
   };
 
-  const handleShowHint = () => {
-    if (hintsRemaining > 0 && !showHint) {
-      setHintsRemaining(prev => prev - 1);
+  const handleHint = () => {
+    if (hintsRemaining > 0) {
       setShowHint(true);
+      setHintsRemaining(prev => prev - 1);
     }
-  };
-
-  const handleBackspace = () => {
-    setUserAnswer(prev => prev.slice(0, -1));
-  };
-
-  // Calculate overall progress for the climbing character
-  const calculateProgress = () => {
-    if (!problem?.steps.length) return 0;
-    return (currentStep / problem.steps.length) * 100;
   };
 
   if (!problem) return null;
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      {/* Add Confetti */}
-      <Confetti isActive={showConfetti} />
-      
       {/* Game Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
         <Typography variant="h4" sx={{ fontFamily: 'Fredoka One', color: 'primary.main' }}>
@@ -490,7 +246,7 @@ const LongDivision = () => {
             ))}
           </Select>
           <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
-            {score} pts
+            {Math.ceil(score)} pts
           </Typography>
           <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
             {streak} 🔥
@@ -498,133 +254,17 @@ const LongDivision = () => {
         </Box>
       </Box>
 
-      {/* Progress Bar */}
-      <Box sx={{ mb: 2 }}>
-        <LinearProgress 
-          variant="determinate" 
-          value={(currentStep / problem.steps.length) * 100}
-          sx={{ height: 10, borderRadius: 5 }}
-        />
-      </Box>
-
-      {/* Game Area */}
-      <Paper sx={{ 
-        p: 4, 
-        borderRadius: 4, 
-        bgcolor: 'background.paper', 
-        position: 'relative',
-        overflow: 'hidden' // Add this to contain the climbing character
-      }}>
-        {/* Add Climbing Character */}
-        <ClimbingCharacter progress={calculateProgress()} />
-
-        {/* Add Streak Multiplier */}
-        <AnimatePresence>
-          {showStreakMultiplier && <StreakMultiplier streak={streak + 1} isVisible={showStreakMultiplier} />}
-        </AnimatePresence>
-
-        {/* Division Problem */}
-        <Box sx={{ position: 'relative', mb: 4 }}>
-          {/* Quotient Display */}
-          <Box sx={{ 
-            position: 'absolute',
-            top: '-40px',
-            left: '80px',
-            display: 'flex',
-            gap: '1.5rem'
-          }}>
-            {problem.steps[currentStep]?.quotientSoFar.split('').map((digit, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2 }}
-              >
-                <Typography sx={{
-                  fontSize: '2.5rem',
-                  fontFamily: 'Fredoka One',
-                  color: '#2196f3'
-                }}>
-                  {digit}
-                </Typography>
-              </motion.div>
-            ))}
-          </Box>
-
-          {/* Division Layout */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-            <Typography sx={{ 
-              fontSize: '2.5rem',
-              fontFamily: 'Fredoka One',
-              color: '#f44336',
-              mr: 2
-            }}>
-              {problem.divisor}
-            </Typography>
-            <Box sx={{ 
-              borderLeft: '3px solid #666',
-              borderTop: '3px solid #666',
-              height: '100%',
-              minHeight: '200px',
-              width: '25px',
-              borderRadius: '8px 0 0 0',
-              mr: 3
-            }} />
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ 
-                fontSize: '2.5rem',
-                fontFamily: 'Fredoka One',
-                mb: 3
-              }}>
-                {problem.dividend}
-              </Typography>
-
-              {/* Working Steps */}
-              <Box sx={{ position: 'relative', minHeight: '150px' }}>
-                <AnimatePresence>
-                  {workingSteps.map((step, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      style={{
-                        position: 'absolute',
-                        left: `${step.position * 60}px`,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-end'
-                      }}
-                    >
-                      <Typography sx={{ 
-                        fontSize: '2rem',
-                        fontFamily: 'Fredoka One',
-                        color: '#f44336'
-                      }}>
-                        -{step.product}
-                      </Typography>
-                      <Box sx={{ 
-                        width: '100%',
-                        height: '2px',
-                        bgcolor: '#666',
-                        my: 1
-                      }} />
-                      <Typography sx={{ 
-                        fontSize: '2rem',
-                        fontFamily: 'Fredoka One',
-                        color: '#4caf50'
-                      }}>
-                        {step.remainder}
-                      </Typography>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 4,
+          background: 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)',
+          position: 'relative'
+        }}
+      >
         {/* Current Step Instruction */}
-        <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
           <Typography 
             variant="h5" 
             sx={{ 
@@ -648,81 +288,141 @@ const LongDivision = () => {
           )}
         </Box>
 
-        {/* User Input Display */}
-        <Box sx={{ 
-          minHeight: '60px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          mb: 3
-        }}>
-          <form onSubmit={handleSubmit}>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <TextField
-                value={userAnswer}
-                onChange={handleInputChange}
-                type="number"
-                pattern="[0-9]*"
-                inputMode="numeric"
-                variant="outlined"
-                size="large"
-                autoComplete="off"
-                sx={{ 
-                  width: 200,
-                  '& input': {
-                    fontSize: '2rem',
-                    textAlign: 'center',
-                    fontFamily: 'Fredoka One'
-                  }
-                }}
-                inputProps={{
-                  inputMode: 'numeric',
-                  pattern: '[0-9]*',
-                  style: {
-                    fontSize: '2rem',
-                    textAlign: 'center',
-                    fontFamily: 'Fredoka One'
-                  }
-                }}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={!userAnswer}
-                sx={{ 
-                  py: 2,
-                  px: 4,
-                  fontFamily: 'Fredoka One'
-                }}
-              >
-                Check Answer
-              </Button>
+        {/* Division Problem Display */}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Box sx={{ 
+            display: 'inline-flex',
+            position: 'relative',
+            mb: 3,
+            alignItems: 'flex-start'
+          }}>
+            {/* Divisor */}
+            <Typography variant="h2" sx={{ 
+              fontFamily: 'Fredoka One',
+              mr: 2,
+              color: '#f44336'
+            }}>
+              {problem.divisor}
+            </Typography>
+
+            {/* Division Symbol and Dividend */}
+            <Box>
+              <Typography variant="h2" sx={{ 
+                fontFamily: 'Fredoka One',
+                borderLeft: '4px solid #666',
+                borderTop: '4px solid #666',
+                paddingLeft: 2,
+                minWidth: '150px',
+                textAlign: 'left',
+                borderRadius: '8px 0 0 0'
+              }}>
+                {problem.dividend}
+              </Typography>
+
+              {/* Quotient Display */}
+              <Box sx={{ 
+                position: 'absolute',
+                top: '-40px',
+                left: '20px'
+              }}>
+                <Typography variant="h3" sx={{ 
+                  fontFamily: 'Fredoka One',
+                  color: '#2196f3'
+                }}>
+                  {problem.steps[currentStep]?.quotientSoFar}
+                </Typography>
+              </Box>
+
+              {/* Working Steps */}
+              <Box sx={{ 
+                position: 'relative',
+                minHeight: '100px',
+                textAlign: 'left',
+                pl: 2
+              }}>
+                {workingSteps.map((step, index) => (
+                  <Box key={index} sx={{ mb: 1 }}>
+                    <Typography sx={{ 
+                      fontFamily: 'Fredoka One',
+                      color: '#f44336'
+                    }}>
+                      -{step.product}
+                    </Typography>
+                    <Box sx={{ 
+                      width: '100%',
+                      height: '2px',
+                      bgcolor: '#666',
+                      my: 0.5
+                    }} />
+                    <Typography sx={{ 
+                      fontFamily: 'Fredoka One',
+                      color: '#4caf50'
+                    }}>
+                      {step.remainder}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </Box>
-          </form>
+          </Box>
+
+          {/* Answer Display */}
+          <Box sx={{ 
+            width: '200px',
+            height: '60px',
+            margin: '0 auto',
+            border: '2px solid',
+            borderColor: 'primary.main',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 3,
+            backgroundColor: 'white'
+          }}>
+            <Typography variant="h3" sx={{ fontFamily: 'Fredoka One' }}>
+              {userAnswer || ' '}
+            </Typography>
+          </Box>
+
+          {/* Number Pad */}
+          <NumberPad
+            onNumberClick={handleNumberClick}
+            onBackspace={handleBackspace}
+            onEnter={handleSubmit}
+            onHint={handleHint}
+            userAnswer={userAnswer}
+            hintsRemaining={hintsRemaining}
+            showHint={showHint}
+          />
         </Box>
 
-        {/* Hint Button */}
-        <Button
-          variant="outlined"
-          onClick={() => {
-            if (hintsRemaining > 0) {
-              setShowHint(true);
-              setHintsRemaining(prev => prev - 1);
-            }
-          }}
-          disabled={hintsRemaining === 0 || showHint}
-          sx={{ 
-            minWidth: '120px',
-            fontFamily: 'Fredoka One'
-          }}
-        >
-          Hint ({hintsRemaining} left)
-        </Button>
+        {/* Feedback Display */}
+        <AnimatePresence>
+          {feedback && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+            >
+              <Paper
+                sx={{ 
+                  p: 2,
+                  mt: 3,
+                  bgcolor: feedback.type === 'success' ? 'success.light' : 'error.light',
+                  color: 'white'
+                }}
+              >
+                <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
+                  {feedback.message}
+                </Typography>
+              </Paper>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {isGameComplete ? (
-          // Next Problem Button
-          <Box sx={{ textAlign: 'center' }}>
+        {isGameComplete && (
+          <Box sx={{ textAlign: 'center', mt: 4 }}>
             <Button
               variant="contained"
               color="primary"
@@ -736,74 +436,7 @@ const LongDivision = () => {
               Next Problem
             </Button>
           </Box>
-        ) : (
-          // Controls
-          <Box sx={{ 
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 2,
-            mt: 2
-          }}>
-            <Button
-              variant="outlined"
-              onClick={handleBackspace}
-              disabled={!userAnswer}
-              sx={{ 
-                minWidth: '120px',
-                fontFamily: 'Fredoka One'
-              }}
-            >
-              Backspace
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={handleShowHint}
-              disabled={hintsRemaining === 0 || showHint}
-              sx={{ 
-                minWidth: '120px',
-                fontFamily: 'Fredoka One'
-              }}
-            >
-              Hint (H)
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleCheckAnswer}
-              disabled={!userAnswer}
-              sx={{ 
-                minWidth: '120px',
-                fontFamily: 'Fredoka One'
-              }}
-            >
-              Enter ↵
-            </Button>
-          </Box>
         )}
-
-        {/* Feedback */}
-        <AnimatePresence>
-          {feedback && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <Paper
-                sx={{ 
-                  p: 2,
-                  mt: 3,
-                  textAlign: 'center',
-                  bgcolor: feedback.type === 'success' ? 'success.light' : 'error.light',
-                  color: 'white'
-                }}
-              >
-                <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
-                  {feedback.message}
-                </Typography>
-              </Paper>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </Paper>
     </Container>
   );

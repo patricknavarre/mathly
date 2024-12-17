@@ -4,7 +4,6 @@ import {
   Container,
   Typography,
   Paper,
-  TextField,
   Button,
   LinearProgress,
   Dialog,
@@ -15,42 +14,66 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Psychology, Lightbulb, Close as CloseIcon } from '@mui/icons-material';
+import NumberPad from '../NumberPad';
 
-const WORD_PROBLEMS = [
+// Problem Templates
+const PROBLEM_TEMPLATES = [
   {
-    question: "Sarah has 24 cookies. She wants to share them equally among 6 friends. How many cookies will each friend get?",
-    answer: 4,
-    hint: "To find out how many cookies each friend gets, divide the total number of cookies by the number of friends.",
-    explanation: "Since Sarah has 24 cookies and wants to share them equally among 6 friends, we divide 24 by 6: 24 ÷ 6 = 4 cookies per friend."
+    template: "NAME has TOTAL_ITEMS ITEMS. They want to share them equally among NUM_FRIENDS friends. How many ITEMS will each friend get?",
+    generateProblem: () => {
+      const friends = Math.floor(Math.random() * 8) + 2; // 2-9 friends
+      const itemsPerFriend = Math.floor(Math.random() * 8) + 2; // 2-9 items per friend
+      const total = friends * itemsPerFriend;
+      const items = ['cookies', 'candies', 'stickers', 'marbles', 'toys'][Math.floor(Math.random() * 5)];
+      const name = ['Sarah', 'Tom', 'Emma', 'Jack', 'Lily'][Math.floor(Math.random() * 5)];
+      return {
+        question: `${name} has ${total} ${items}. They want to share them equally among ${friends} friends. How many ${items} will each friend get?`,
+        answer: itemsPerFriend,
+        hint: `To find out how many ${items} each friend gets, divide the total number of ${items} by the number of friends.`,
+        explanation: `Since ${name} has ${total} ${items} and wants to share them equally among ${friends} friends, we divide ${total} by ${friends}: ${total} ÷ ${friends} = ${itemsPerFriend} ${items} per friend.`
+      };
+    }
   },
   {
-    question: "A toy store has 3 shelves of action figures. Each shelf can hold 8 figures. How many action figures can the store display in total?",
-    answer: 24,
-    hint: "To find the total number of action figures, multiply the number of shelves by how many figures each shelf can hold.",
-    explanation: "With 3 shelves that can each hold 8 figures, we multiply: 3 × 8 = 24 total action figures."
+    template: "A store has ROWS rows of ITEMS. Each row has ITEMS_PER_ROW items. How many ITEMS can the store display in total?",
+    generateProblem: () => {
+      const rows = Math.floor(Math.random() * 7) + 2; // 2-8 rows
+      const itemsPerRow = Math.floor(Math.random() * 7) + 2; // 2-8 items per row
+      const total = rows * itemsPerRow;
+      const items = ['action figures', 'books', 'games', 'puzzles', 'toys'][Math.floor(Math.random() * 5)];
+      return {
+        question: `A store has ${rows} rows of ${items}. Each row has ${itemsPerRow} ${items}. How many ${items} can the store display in total?`,
+        answer: total,
+        hint: `To find the total number of ${items}, multiply the number of rows by the number of ${items} in each row.`,
+        explanation: `With ${rows} rows and ${itemsPerRow} ${items} per row, we multiply: ${rows} × ${itemsPerRow} = ${total} total ${items}.`
+      };
+    }
   },
   {
-    question: "Tom has $15. He wants to buy notebooks that cost $3 each. How many notebooks can he buy?",
-    answer: 5,
-    hint: "To find how many notebooks Tom can buy, divide his money by the cost of each notebook.",
-    explanation: "Since Tom has $15 and each notebook costs $3, we divide: $15 ÷ $3 = 5 notebooks."
-  },
-  {
-    question: "A garden has 7 rows of flowers. Each row has 6 flowers. How many flowers are there in total?",
-    answer: 42,
-    hint: "To find the total number of flowers, multiply the number of rows by the number of flowers in each row.",
-    explanation: "With 7 rows and 6 flowers per row, we multiply: 7 × 6 = 42 total flowers."
-  },
-  {
-    question: "Emma has 32 stickers. She gives 4 stickers to each of her friends. How many friends can she give stickers to?",
-    answer: 8,
-    hint: "To find how many friends can get stickers, divide the total number of stickers by stickers per friend.",
-    explanation: "Since Emma has 32 stickers and gives 4 to each friend, we divide: 32 ÷ 4 = 8 friends."
+    template: "NAME has MONEY dollars. They want to buy ITEMS that cost COST dollars each. How many ITEMS can they buy?",
+    generateProblem: () => {
+      const itemCost = Math.floor(Math.random() * 8) + 2; // $2-9 per item
+      const numItems = Math.floor(Math.random() * 7) + 2; // 2-8 items
+      const total = itemCost * numItems;
+      const items = ['notebooks', 'pencils', 'erasers', 'markers', 'books'][Math.floor(Math.random() * 5)];
+      const name = ['Tom', 'Lisa', 'Alex', 'Maya', 'Noah'][Math.floor(Math.random() * 5)];
+      return {
+        question: `${name} has $${total}. They want to buy ${items} that cost $${itemCost} each. How many ${items} can they buy?`,
+        answer: numItems,
+        hint: `To find how many ${items} ${name} can buy, divide their money by the cost of each ${items.slice(0, -1)}.`,
+        explanation: `Since ${name} has $${total} and each ${items.slice(0, -1)} costs $${itemCost}, we divide: $${total} ÷ $${itemCost} = ${numItems} ${items}.`
+      };
+    }
   }
 ];
 
+const generateRandomProblem = () => {
+  const template = PROBLEM_TEMPLATES[Math.floor(Math.random() * PROBLEM_TEMPLATES.length)];
+  return template.generateProblem();
+};
+
 const BrainTeasers = () => {
-  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
+  const [currentProblem, setCurrentProblem] = useState(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -73,10 +96,19 @@ const BrainTeasers = () => {
     return () => clearInterval(timer);
   }, [isGameActive, timeLeft]);
 
-  const handleInputChange = (e) => {
-    // Only allow numbers and limit length
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setUserAnswer(value);
+  const handleNumberClick = (number) => {
+    setUserAnswer(prev => prev + number);
+  };
+
+  const handleBackspace = () => {
+    setUserAnswer(prev => prev.slice(0, -1));
+  };
+
+  const handleHint = () => {
+    if (hintsRemaining > 0) {
+      setShowHint(true);
+      setHintsRemaining(prev => prev - 1);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -91,16 +123,15 @@ const BrainTeasers = () => {
     setScore(0);
     setStreak(0);
     setTimeLeft(300);
-    setCurrentProblemIndex(0);
     setHintsRemaining(3);
     setUserAnswer('');
     setFeedback(null);
     setShowHint(false);
     setShowExplanation(false);
+    setCurrentProblem(generateRandomProblem());
   };
 
   const handleAnswer = () => {
-    const currentProblem = WORD_PROBLEMS[currentProblemIndex];
     const numAnswer = parseInt(userAnswer);
 
     if (numAnswer === currentProblem.answer) {
@@ -116,19 +147,12 @@ const BrainTeasers = () => {
         message: `🎉 Correct! +${points} points!`
       });
 
-      // Show explanation dialog
-      setShowExplanation(true);
-
       // Move to next problem after delay
       setTimeout(() => {
-        if (currentProblemIndex < WORD_PROBLEMS.length - 1) {
-          setCurrentProblemIndex((prev) => prev + 1);
-          setUserAnswer('');
-          setFeedback(null);
-          setShowHint(false);
-        } else {
-          setIsGameActive(false);
-        }
+        setCurrentProblem(generateRandomProblem());
+        setUserAnswer('');
+        setFeedback(null);
+        setShowHint(false);
       }, 2000);
     } else {
       setStreak(0);
@@ -163,7 +187,7 @@ const BrainTeasers = () => {
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
-              {score} pts
+              {Math.ceil(score)} pts
             </Typography>
             <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
               {streak} 🔥
@@ -227,155 +251,132 @@ const BrainTeasers = () => {
                   lineHeight: 1.6
                 }}
               >
-                {WORD_PROBLEMS[currentProblemIndex].question}
+                {currentProblem?.question}
               </Typography>
 
-              {/* Input Area */}
-              <form onSubmit={handleSubmit}>
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
-                  <TextField
-                    value={userAnswer}
-                    onChange={handleInputChange}
-                    type="number"
-                    pattern="[0-9]*"
-                    inputMode="numeric"
-                    variant="outlined"
-                    size="large"
-                    autoComplete="off"
-                    sx={{
-                      width: 200,
-                      '& input': {
-                        fontSize: '2rem',
-                        textAlign: 'center',
-                        fontFamily: 'Fredoka One'
-                      }
-                    }}
-                    inputProps={{
-                      inputMode: 'numeric',
-                      pattern: '[0-9]*',
-                      style: {
-                        fontSize: '2rem',
-                        textAlign: 'center',
-                        fontFamily: 'Fredoka One'
-                      }
-                    }}
-                  />
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={!userAnswer}
-                    sx={{
-                      py: 2,
-                      px: 4,
-                      fontFamily: 'Fredoka One'
-                    }}
-                  >
-                    Check Answer
-                  </Button>
-                </Box>
-              </form>
-
-              {/* Hint Button */}
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  if (hintsRemaining > 0) {
-                    setShowHint(true);
-                    setHintsRemaining(prev => prev - 1);
-                  }
-                }}
-                disabled={hintsRemaining === 0 || showHint}
-                sx={{ 
-                  mt: 2,
-                  fontFamily: 'Fredoka One'
-                }}
-              >
-                Hint ({hintsRemaining} left)
-              </Button>
-            </Box>
-
-            {/* Feedback Display */}
-            <AnimatePresence>
-              {feedback && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                >
-                  <Paper
-                    sx={{
-                      p: 2,
-                      mt: 3,
-                      bgcolor: feedback.type === 'success' ? 'success.light' : 'error.light',
-                      color: 'white'
-                    }}
-                  >
-                    <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
-                      {feedback.message}
-                    </Typography>
-                  </Paper>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Hint Display */}
-            {showHint && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <Paper
+              {/* Hint Display */}
+              {showHint && (
+                <Typography
+                  variant="body1"
                   sx={{
-                    p: 3,
-                    mt: 2,
-                    bgcolor: 'background.paper',
-                    border: '2px solid',
-                    borderColor: 'secondary.main'
+                    mb: 3,
+                    color: 'info.main',
+                    fontFamily: 'Fredoka One'
                   }}
                 >
-                  <Typography variant="body1" sx={{ fontFamily: 'Fredoka One' }}>
-                    💡 {WORD_PROBLEMS[currentProblemIndex].hint}
-                  </Typography>
-                </Paper>
-              </motion.div>
-            )}
+                  💡 {currentProblem?.hint}
+                </Typography>
+              )}
+
+              {/* Answer Display */}
+              <Box sx={{ 
+                width: '200px',
+                height: '60px',
+                margin: '0 auto',
+                border: '2px solid',
+                borderColor: 'primary.main',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 3,
+                backgroundColor: 'white'
+              }}>
+                <Typography variant="h3" sx={{ fontFamily: 'Fredoka One' }}>
+                  {userAnswer || ' '}
+                </Typography>
+              </Box>
+
+              {/* Number Pad */}
+              <NumberPad
+                onNumberClick={handleNumberClick}
+                onBackspace={handleBackspace}
+                onEnter={handleSubmit}
+                onHint={handleHint}
+                userAnswer={userAnswer}
+                hintsRemaining={hintsRemaining}
+                showHint={showHint}
+              />
+
+              {/* Feedback Display */}
+              <AnimatePresence>
+                {feedback && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                  >
+                    <Paper
+                      sx={{
+                        p: 2,
+                        mt: 3,
+                        bgcolor: feedback.type === 'success' ? 'success.light' : 'error.light',
+                        color: 'white'
+                      }}
+                    >
+                      <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
+                        {feedback.message}
+                      </Typography>
+                    </Paper>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Show Solution Button */}
+              <Box sx={{ mt: 3, textAlign: 'center' }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setShowExplanation(true)}
+                  startIcon={<Lightbulb />}
+                  sx={{ 
+                    fontFamily: 'Fredoka One',
+                    color: 'info.main',
+                    borderColor: 'info.main',
+                    '&:hover': {
+                      borderColor: 'info.dark',
+                      backgroundColor: 'info.light'
+                    }
+                  }}
+                >
+                  Show Solution
+                </Button>
+              </Box>
+            </Box>
           </>
         )}
-      </Paper>
 
-      {/* Explanation Dialog */}
-      <Dialog
-        open={showExplanation}
-        onClose={() => setShowExplanation(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
-              Solution Explanation
+        {/* Explanation Dialog */}
+        <Dialog
+          open={showExplanation}
+          onClose={() => setShowExplanation(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
+                Solution Explanation 💡
+              </Typography>
+              <IconButton onClick={() => setShowExplanation(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            <Typography sx={{ fontFamily: 'Fredoka One' }}>
+              {currentProblem?.explanation}
             </Typography>
-            <IconButton onClick={() => setShowExplanation(false)}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" sx={{ mt: 2 }}>
-            {WORD_PROBLEMS[currentProblemIndex].explanation}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setShowExplanation(false)}
-            variant="contained"
-            sx={{ fontFamily: 'Fredoka One' }}
-          >
-            Got it!
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setShowExplanation(false)}
+              sx={{ fontFamily: 'Fredoka One' }}
+            >
+              Got it!
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Paper>
     </Container>
   );
 };
