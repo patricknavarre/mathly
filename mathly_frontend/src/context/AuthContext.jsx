@@ -1,77 +1,68 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const token = localStorage.getItem('mathly_token');
-    if (token) {
-      loadUser(token);
-    } else {
-      setLoading(false);
+    const storedUser = localStorage.getItem('mathly_user');
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
     }
+    setLoading(false);
   }, []);
-
-  const loadUser = async (token) => {
-    try {
-      const response = await axios.get('http://localhost:5002/api/users/profile', {
-        headers: { 'x-auth-token': token }
-      });
-      setUser(response.data);
-    } catch (err) {
-      localStorage.removeItem('mathly_token');
-      setError('Session expired. Please login again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5002/api/users/login', {
+      // Simulate login - replace with actual API call later
+      const mockUser = {
+        id: '1',
         email,
-        password
-      });
+        displayName: email.split('@')[0],
+        avatar: '🦁'
+      };
       
-      const { token, user } = response.data;
-      localStorage.setItem('mathly_token', token);
-      setUser(user);
+      localStorage.setItem('mathly_user', JSON.stringify(mockUser));
+      setCurrentUser(mockUser);
       setError(null);
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError('Login failed');
       return false;
     }
   };
 
   const signup = async (userData) => {
     try {
-      const response = await axios.post('http://localhost:5002/api/users/register', userData);
+      // Simulate signup - replace with actual API call later
+      const mockUser = {
+        id: '1',
+        email: userData.email,
+        displayName: userData.username || userData.email.split('@')[0],
+        avatar: userData.avatar || '🦁'
+      };
       
-      const { token, user } = response.data;
-      localStorage.setItem('mathly_token', token);
-      setUser(user);
+      localStorage.setItem('mathly_user', JSON.stringify(mockUser));
+      setCurrentUser(mockUser);
       setError(null);
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || 'Signup failed');
+      setError('Signup failed');
       return false;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('mathly_token');
-    setUser(null);
+    localStorage.removeItem('mathly_user');
+    setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, signup, logout }}>
+    <AuthContext.Provider value={{ currentUser, loading, error, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

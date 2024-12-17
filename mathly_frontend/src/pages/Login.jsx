@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Box, 
   Container, 
@@ -8,38 +8,27 @@ import {
   Button, 
   Alert 
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Rocket, School } from '@mui/icons-material';
-import confetti from 'canvas-confetti';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { School } from '@mui/icons-material';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    // If there's a success message from signup, trigger confetti
-    if (location.state?.message) {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    }
-  }, [location]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // TODO: Implement actual login logic
-      console.log('Logging in with:', formData);
-      // For now, just navigate to dashboard
-      navigate('/dashboard');
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        navigate('/learn');
+      }
     } catch (err) {
       setError('Invalid credentials. Please try again.');
     }
@@ -55,31 +44,6 @@ const Login = () => {
         overflow: 'hidden'
       }}
     >
-      {/* Floating background elements */}
-      <Box sx={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0, zIndex: 0 }}>
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, 360],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: i * 0.2,
-            }}
-          >
-            {['✨', '🌟', '⭐️', '💫'][Math.floor(Math.random() * 4)]}
-          </motion.div>
-        ))}
-      </Box>
-
       <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -115,26 +79,6 @@ const Login = () => {
               </Typography>
             </Box>
 
-            <AnimatePresence>
-              {location.state?.message && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                >
-                  <Alert 
-                    severity="success" 
-                    sx={{ mb: 3 }}
-                    onClose={() => {
-                      navigate('.', { replace: true, state: {} });
-                    }}
-                  >
-                    {location.state.message}
-                  </Alert>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             {error && (
               <Alert severity="error" sx={{ mb: 3 }}>
                 {error}
@@ -163,11 +107,11 @@ const Login = () => {
                   type="submit"
                   variant="contained"
                   size="large"
-                  endIcon={<Rocket />}
                   sx={{ 
                     mt: 2,
                     py: 1.5,
-                    fontSize: '1.1rem'
+                    fontSize: '1.1rem',
+                    fontFamily: 'Fredoka One'
                   }}
                 >
                   Let's Learn! 🚀
@@ -181,7 +125,7 @@ const Login = () => {
               </Typography>
               <Button
                 onClick={() => navigate('/signup')}
-                sx={{ mt: 1 }}
+                sx={{ mt: 1, fontFamily: 'Fredoka One' }}
               >
                 Join the Fun! ✨
               </Button>

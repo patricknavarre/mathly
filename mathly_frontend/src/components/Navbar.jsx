@@ -1,64 +1,71 @@
-import { AppBar, Toolbar, Typography, Button, Box, Container } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
-    <AppBar 
-      position="static" 
-      sx={{ 
-        backgroundColor: 'white',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-      }}
-    >
-      <Container maxWidth="lg">
-        <Toolbar disableGutters>
-          <Typography
-            variant="h6"
-            sx={{ 
-              flexGrow: 1, 
-              fontFamily: 'Fredoka One',
-              fontSize: '1.8rem',
-              color: 'primary.main',
-              cursor: 'pointer',
-              '&:hover': {
-                transform: 'scale(1.02)',
-                transition: 'transform 0.2s'
-              }
-            }}
-            onClick={() => navigate('/')}
-          >
-            Mathly
-          </Typography>
+    <AppBar position="static" sx={{ bgcolor: 'primary.main' }}>
+      <Toolbar>
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            flexGrow: 1, 
+            cursor: 'pointer',
+            fontFamily: 'Fredoka One'
+          }}
+          onClick={() => navigate('/')}
+        >
+          Mathly
+        </Typography>
+        
+        {currentUser ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar sx={{ bgcolor: 'secondary.main' }}>
+              {currentUser.avatar || currentUser.email[0].toUpperCase()}
+            </Avatar>
+            <Button 
+              color="inherit" 
+              onClick={() => navigate('/learn')}
+              sx={{ fontFamily: 'Fredoka One' }}
+            >
+              Learn
+            </Button>
+            <Button 
+              color="inherit" 
+              onClick={handleLogout}
+              sx={{ fontFamily: 'Fredoka One' }}
+            >
+              Logout
+            </Button>
+          </Box>
+        ) : (
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button 
-              color="inherit"
-              sx={{ 
-                fontWeight: 600,
-                color: 'text.secondary'
-              }}
+              color="inherit" 
               onClick={() => navigate('/login')}
+              sx={{ fontFamily: 'Fredoka One' }}
             >
               Login
             </Button>
             <Button 
-              variant="contained" 
-              color="secondary"
-              sx={{ 
-                fontWeight: 600,
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  transition: 'transform 0.2s'
-                }
-              }}
+              color="inherit" 
               onClick={() => navigate('/signup')}
+              sx={{ fontFamily: 'Fredoka One' }}
             >
               Sign Up
             </Button>
           </Box>
-        </Toolbar>
-      </Container>
+        )}
+      </Toolbar>
     </AppBar>
   );
 };

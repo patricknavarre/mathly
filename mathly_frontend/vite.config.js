@@ -34,9 +34,10 @@ export default defineConfig({
     clean: true
   },
   server: {
-    port: 5174,
+    port: 5175,
     strictPort: true,
-    host: true
+    host: true,
+    force: true // Force the server to restart
   },
   resolve: {
     alias: {

@@ -313,38 +313,17 @@ const LongDivision = () => {
     startNewProblem();
   }, [difficulty]);
 
-  // Add keyboard support
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      // Only handle keyboard events on desktop
-      if (window.innerWidth > 768) {
-        // Handle number keys
-        if (/^[0-9]$/.test(e.key)) {
-          setUserAnswer(prev => prev + e.key);
-        }
-        // Handle backspace
-        else if (e.key === 'Backspace') {
-          handleBackspace();
-        }
-        // Handle enter
-        else if (e.key === 'Enter' && userAnswer) {
-          handleCheckAnswer();
-        }
-        // Handle hint
-        else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
-          handleShowHint();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [userAnswer, hintsRemaining, showHint]);
-
   const handleInputChange = (e) => {
-    // Only allow numbers
+    // Only allow numbers and limit length
     const value = e.target.value.replace(/[^0-9]/g, '');
     setUserAnswer(value);
+  };
+
+  const handleSubmit = (e) => {
+    e?.preventDefault(); // Make parameter optional
+    if (userAnswer) {
+      handleCheckAnswer();
+    }
   };
 
   const startNewProblem = () => {
@@ -677,33 +656,69 @@ const LongDivision = () => {
           alignItems: 'center',
           mb: 3
         }}>
-          <TextField
-            value={userAnswer}
-            onChange={handleInputChange}
-            type="number"
-            pattern="[0-9]*"
-            inputMode="numeric"
-            variant="outlined"
-            size="large"
-            sx={{ 
-              width: 200,
-              '& input': {
-                fontSize: '2rem',
-                textAlign: 'center',
-                fontFamily: 'Fredoka One'
-              }
-            }}
-            inputProps={{
-              inputMode: 'numeric',
-              pattern: '[0-9]*',
-              style: {
-                fontSize: '2rem',
-                textAlign: 'center',
-                fontFamily: 'Fredoka One'
-              }
-            }}
-          />
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                value={userAnswer}
+                onChange={handleInputChange}
+                type="number"
+                pattern="[0-9]*"
+                inputMode="numeric"
+                variant="outlined"
+                size="large"
+                autoComplete="off"
+                sx={{ 
+                  width: 200,
+                  '& input': {
+                    fontSize: '2rem',
+                    textAlign: 'center',
+                    fontFamily: 'Fredoka One'
+                  }
+                }}
+                inputProps={{
+                  inputMode: 'numeric',
+                  pattern: '[0-9]*',
+                  style: {
+                    fontSize: '2rem',
+                    textAlign: 'center',
+                    fontFamily: 'Fredoka One'
+                  }
+                }}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={!userAnswer}
+                sx={{ 
+                  py: 2,
+                  px: 4,
+                  fontFamily: 'Fredoka One'
+                }}
+              >
+                Check Answer
+              </Button>
+            </Box>
+          </form>
         </Box>
+
+        {/* Hint Button */}
+        <Button
+          variant="outlined"
+          onClick={() => {
+            if (hintsRemaining > 0) {
+              setShowHint(true);
+              setHintsRemaining(prev => prev - 1);
+            }
+          }}
+          disabled={hintsRemaining === 0 || showHint}
+          sx={{ 
+            minWidth: '120px',
+            fontFamily: 'Fredoka One'
+          }}
+        >
+          Hint ({hintsRemaining} left)
+        </Button>
 
         {isGameComplete ? (
           // Next Problem Button
@@ -762,19 +777,6 @@ const LongDivision = () => {
             >
               Enter ↵
             </Button>
-          </Box>
-        )}
-
-        {/* Keyboard Instructions */}
-        {!isGameComplete && (
-          <Box sx={{ 
-            mt: 4, 
-            textAlign: 'center',
-            color: 'text.secondary'
-          }}>
-            <Typography sx={{ fontFamily: 'Fredoka One' }}>
-              Use number keys to type • Enter ↵ to check • Backspace to delete • H for hint
-            </Typography>
           </Box>
         )}
 

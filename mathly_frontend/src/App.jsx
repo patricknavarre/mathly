@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Create a fun, kid-friendly theme
 const theme = createTheme({
@@ -45,32 +46,88 @@ import Navbar from './components/Navbar';
 import Landing from './pages/Landing';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
 import Learn from './pages/Learn';
 import LongDivision from './components/games/LongDivision';
 import MultiplicationPractice from './components/games/MultiplicationPractice';
 import SpeedMath from './components/games/SpeedMath';
 import BrainTeasers from './components/games/BrainTeasers';
 
+// Add ProtectedRoute component
+const ProtectedRoute = ({ children }) => {
+  const { currentUser } = useAuth();
+  
+  if (!currentUser) {
+    return <Navigate to="/login" />;
+  }
+  
+  return children;
+};
+
+// Add AuthRoute component to redirect logged-in users away from auth pages
+const AuthRoute = ({ children }) => {
+  const { currentUser } = useAuth();
+  
+  if (currentUser) {
+    return <Navigate to="/learn" />;
+  }
+  
+  return children;
+};
+
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <AuthProvider>
       <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/learn" element={<Learn />} />
-          <Route path="/learn/division/long" element={<LongDivision />} />
-          <Route path="/learn/multiplication" element={<MultiplicationPractice />} />
-          <Route path="/learn/speed-math" element={<SpeedMath />} />
-          <Route path="/learn/brain-teasers" element={<BrainTeasers />} />
-        </Routes>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={
+              <AuthRoute>
+                <Login />
+              </AuthRoute>
+            } />
+            <Route path="/signup" element={
+              <AuthRoute>
+                <SignUp />
+              </AuthRoute>
+            } />
+            <Route path="/learn" element={
+              <ProtectedRoute>
+                <Learn />
+              </ProtectedRoute>
+            } />
+            <Route path="/learn/multiplication" element={
+              <ProtectedRoute>
+                <MultiplicationPractice />
+              </ProtectedRoute>
+            } />
+            <Route path="/learn/division/long" element={
+              <ProtectedRoute>
+                <LongDivision />
+              </ProtectedRoute>
+            } />
+            <Route path="/learn/brain-teasers" element={
+              <ProtectedRoute>
+                <BrainTeasers />
+              </ProtectedRoute>
+            } />
+            <Route path="/learn/speed-math" element={
+              <ProtectedRoute>
+                <SpeedMath />
+              </ProtectedRoute>
+            } />
+            {/* Catch all route - redirect to learn page if logged in, otherwise to landing */}
+            <Route path="*" element={
+              <ProtectedRoute>
+                <Navigate to="/learn" replace />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </ThemeProvider>
       </Router>
-    </ThemeProvider>
+    </AuthProvider>
   );
 }
 

@@ -12,6 +12,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Lightbulb, Rocket } from '@mui/icons-material';
+import { useAuth } from '../../context/AuthContext';
 
 // Add ClimbingCharacter component
 const ClimbingCharacter = ({ progress }) => {
@@ -190,6 +191,7 @@ const StreakMultiplier = ({ streak, isVisible }) => {
 };
 
 const MultiplicationPractice = () => {
+  const { currentUser } = useAuth();
   const [problem, setProblem] = useState(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
@@ -270,17 +272,39 @@ const MultiplicationPractice = () => {
     return (problemsCompleted % PROBLEMS_PER_LEVEL) * (100 / PROBLEMS_PER_LEVEL);
   };
 
-  // Modify handleAnswer to include new animations and progress
+  // Modify handleAnswer to include user info
   const handleAnswer = (answer) => {
+    if (!currentUser) return; // Safety check
+
     const numAnswer = parseInt(answer);
     if (numAnswer === problem.answer) {
       // Show streak multiplier
       setShowStreakMultiplier(true);
       setTimeout(() => setShowStreakMultiplier(false), 1000);
 
-      setScore(prev => prev + (level * 10 * (streak + 1)));
+      const points = level * 10 * (streak + 1);
+      setScore(prev => prev + points);
       setStreak(prev => prev + 1);
       setProblemsCompleted(prev => prev + 1);
+
+      // Update user's score in the database
+      try {
+        fetch('/api/progress/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: currentUser.uid,
+            game: 'multiplication',
+            score: points,
+            level: level,
+            problemsCompleted: problemsCompleted + 1
+          })
+        });
+      } catch (error) {
+        console.error('Error updating progress:', error);
+      }
 
       // Level up check
       if (problemsCompleted > 0 && (problemsCompleted + 1) % PROBLEMS_PER_LEVEL === 0 && level < 4) {
@@ -295,7 +319,7 @@ const MultiplicationPractice = () => {
 
       setFeedback({
         type: 'success',
-        message: `🎉 Correct! +${level * 10 * (streak + 1)} points!`
+        message: `🎉 Correct! +${points} points!`
       });
 
       // Generate new problem after delay
@@ -315,49 +339,47 @@ const MultiplicationPractice = () => {
     }
   };
 
-  // Add keyboard support
+  // Load user's progress when component mounts
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      // Only handle keyboard events on desktop
-      if (window.innerWidth > 768) {
-        // Handle number keys
-        if (/^[0-9]$/.test(e.key)) {
-          setUserAnswer(prev => prev + e.key);
-        }
-        // Handle backspace
-        else if (e.key === 'Backspace') {
-          setUserAnswer(prev => prev.slice(0, -1));
-        }
-        // Handle enter
-        else if (e.key === 'Enter' && userAnswer) {
-          handleAnswer(userAnswer);
-        }
-        // Handle hint
-        else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
-          handleShowHint();
-        }
+    if (currentUser) {
+      try {
+        fetch(`/api/progress/${currentUser.uid}/multiplication`)
+          .then(res => res.json())
+          .then(data => {
+            if (data) {
+              setLevel(data.level || 1);
+              setScore(data.score || 0);
+              setProblemsCompleted(data.problemsCompleted || 0);
+            }
+          });
+      } catch (error) {
+        console.error('Error loading progress:', error);
       }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [userAnswer, hintsRemaining, showHint]);
+    }
+  }, [currentUser]);
 
   const handleInputChange = (e) => {
-    // Only allow numbers
+    // Only allow numbers and limit length
     const value = e.target.value.replace(/[^0-9]/g, '');
     setUserAnswer(value);
   };
 
-  const handleShowHint = () => {
-    if (hintsRemaining > 0 && !showHint) {
-      setShowHint(true);
-      setHintsRemaining(prev => prev - 1);
+  const handleSubmit = (e) => {
+    e?.preventDefault(); // Make parameter optional
+    if (userAnswer) {
+      handleAnswer(userAnswer);
     }
   };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
+      {/* Add user info display */}
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
+        <Typography variant="h6" sx={{ fontFamily: 'Fredoka One', color: 'text.secondary' }}>
+          {currentUser?.displayName || currentUser?.email}
+        </Typography>
+      </Box>
+
       <Paper 
         elevation={3}
         sx={{ 
@@ -414,72 +436,66 @@ const MultiplicationPractice = () => {
             </Typography>
 
             {/* Input Area */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
-              <TextField
-                value={userAnswer}
-                onChange={handleInputChange}
-                type="number"
-                pattern="[0-9]*"
-                inputMode="numeric"
-                variant="outlined"
-                size="large"
-                sx={{ 
-                  width: 200,
-                  '& input': {
-                    fontSize: '2rem',
-                    textAlign: 'center',
+            <form onSubmit={handleSubmit}>
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
+                <TextField
+                  value={userAnswer}
+                  onChange={handleInputChange}
+                  type="number"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  variant="outlined"
+                  size="large"
+                  autoComplete="off"
+                  sx={{ 
+                    width: 200,
+                    '& input': {
+                      fontSize: '2rem',
+                      textAlign: 'center',
+                      fontFamily: 'Fredoka One'
+                    }
+                  }}
+                  inputProps={{
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*',
+                    style: {
+                      fontSize: '2rem',
+                      textAlign: 'center',
+                      fontFamily: 'Fredoka One'
+                    }
+                  }}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={{ 
+                    py: 2,
+                    px: 4,
                     fontFamily: 'Fredoka One'
-                  }
-                }}
-                inputProps={{
-                  inputMode: 'numeric',
-                  pattern: '[0-9]*',
-                  style: {
-                    fontSize: '2rem',
-                    textAlign: 'center',
-                    fontFamily: 'Fredoka One'
-                  }
-                }}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleAnswer(userAnswer)}
-                sx={{ 
-                  py: 2,
-                  px: 4,
-                  fontFamily: 'Fredoka One'
-                }}
-              >
-                Enter ↵
-              </Button>
-            </Box>
+                  }}
+                >
+                  Check Answer
+                </Button>
+              </Box>
+            </form>
 
             {/* Hint Button */}
             <Button
               variant="outlined"
-              onClick={handleShowHint}
-              disabled={hintsRemaining === 0 || showHint}
-              sx={{ 
-                minWidth: '120px',
-                fontFamily: 'Fredoka One'
+              onClick={() => {
+                if (hintsRemaining > 0) {
+                  setShowHint(true);
+                  setHintsRemaining(prev => prev - 1);
+                }
               }}
+              disabled={hintsRemaining === 0 || showHint}
+              sx={{ mt: 2, fontFamily: 'Fredoka One' }}
             >
-              Hint (H)
+              Hint ({hintsRemaining} left)
             </Button>
           </Box>
         )}
-
-        {/* Keyboard Instructions */}
-        <Box sx={{ 
-          mt: 4, 
-          textAlign: 'center',
-          color: 'text.secondary'
-        }}>
-          <Typography sx={{ fontFamily: 'Fredoka One' }}>
-            Use number keys to type • Enter ↵ to check • Backspace to delete • H for hint
-          </Typography>
-        </Box>
 
         {/* Feedback Display */}
         <AnimatePresence>

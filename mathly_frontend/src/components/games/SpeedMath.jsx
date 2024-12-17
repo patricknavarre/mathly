@@ -42,43 +42,15 @@ const SpeedMath = () => {
     return () => clearInterval(timer);
   }, [isGameActive, timeLeft]);
 
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (window.innerWidth > 768) {
-        if (!isGameActive || !problem) return;
-
-        // Handle number keys
-        if (/^[0-9]$/.test(e.key)) {
-          setUserAnswer(prev => prev + e.key);
-        }
-        // Handle backspace
-        else if (e.key === 'Backspace') {
-          setUserAnswer(prev => prev.slice(0, -1));
-        }
-        // Handle enter
-        else if (e.key === 'Enter' && userAnswer) {
-          handleAnswer();
-        }
-        // Handle hint
-        else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
-          handleShowHint();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [userAnswer, isGameActive, problem, hintsRemaining, showHint]);
-
   const handleInputChange = (e) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
     setUserAnswer(value);
   };
 
-  const handleShowHint = () => {
-    if (hintsRemaining > 0 && !showHint) {
-      setHintsRemaining(prev => prev - 1);
-      setShowHint(true);
+  const handleSubmit = (e) => {
+    e?.preventDefault();
+    if (userAnswer) {
+      handleAnswer();
     }
   };
 
@@ -266,58 +238,67 @@ const SpeedMath = () => {
                 </Typography>
 
                 {/* Input Area */}
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
-                  <TextField
-                    value={userAnswer}
-                    onChange={handleInputChange}
-                    type="number"
-                    pattern="[0-9]*"
-                    inputMode="numeric"
-                    variant="outlined"
-                    size="large"
-                    sx={{
-                      width: 200,
-                      '& input': {
-                        fontSize: '2rem',
-                        textAlign: 'center',
+                <form onSubmit={handleSubmit}>
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
+                    <TextField
+                      value={userAnswer}
+                      onChange={handleInputChange}
+                      type="number"
+                      pattern="[0-9]*"
+                      inputMode="numeric"
+                      variant="outlined"
+                      size="large"
+                      autoComplete="off"
+                      sx={{
+                        width: 200,
+                        '& input': {
+                          fontSize: '2rem',
+                          textAlign: 'center',
+                          fontFamily: 'Fredoka One'
+                        }
+                      }}
+                      inputProps={{
+                        inputMode: 'numeric',
+                        pattern: '[0-9]*',
+                        style: {
+                          fontSize: '2rem',
+                          textAlign: 'center',
+                          fontFamily: 'Fredoka One'
+                        }
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      disabled={!userAnswer}
+                      sx={{
+                        py: 2,
+                        px: 4,
                         fontFamily: 'Fredoka One'
-                      }
-                    }}
-                    inputProps={{
-                      inputMode: 'numeric',
-                      pattern: '[0-9]*',
-                      style: {
-                        fontSize: '2rem',
-                        textAlign: 'center',
-                        fontFamily: 'Fredoka One'
-                      }
-                    }}
-                  />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleAnswer}
-                    sx={{
-                      py: 2,
-                      px: 4,
-                      fontFamily: 'Fredoka One'
-                    }}
-                  >
-                    Check Answer
-                  </Button>
-                </Box>
+                      }}
+                    >
+                      Check Answer
+                    </Button>
+                  </Box>
+                </form>
 
                 {/* Hint Button */}
                 <Button
                   variant="outlined"
-                  onClick={handleShowHint}
+                  onClick={() => {
+                    if (hintsRemaining > 0) {
+                      setShowHint(true);
+                      setHintsRemaining(prev => prev - 1);
+                    }
+                  }}
                   disabled={hintsRemaining === 0 || showHint}
                   sx={{ 
-                    minWidth: '120px',
+                    mt: 2,
                     fontFamily: 'Fredoka One'
                   }}
                 >
-                  Hint (H)
+                  Hint ({hintsRemaining} left)
                 </Button>
               </Box>
             )}
@@ -387,17 +368,6 @@ const SpeedMath = () => {
                 </Paper>
               </motion.div>
             )}
-
-            {/* Keyboard Instructions */}
-            <Box sx={{ 
-              mt: 4, 
-              textAlign: 'center',
-              color: 'text.secondary'
-            }}>
-              <Typography sx={{ fontFamily: 'Fredoka One' }}>
-                Use number keys to type • Enter ↵ to check • Backspace to delete • H for hint
-              </Typography>
-            </Box>
           </>
         )}
       </Paper>
