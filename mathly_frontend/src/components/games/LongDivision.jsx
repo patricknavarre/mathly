@@ -316,8 +316,12 @@ const LongDivision = () => {
   // Add keyboard support
   useEffect(() => {
     const handleKeyPress = (e) => {
-      // Only handle special keys, let TextField handle numbers
-      if (e.key === 'Backspace') {
+      // Handle number keys
+      if (/^[0-9]$/.test(e.key)) {
+        setUserAnswer(prev => prev + e.key);
+      }
+      // Handle backspace
+      else if (e.key === 'Backspace') {
         handleBackspace();
       }
       // Handle enter
@@ -342,6 +346,7 @@ const LongDivision = () => {
     setWorkingSteps([]);
     setShowHint(false);
     setProblemsCompleted(prev => prev + 1);
+    setIsGameComplete(false);
     generateSteps(newProblem);
   };
 
@@ -428,17 +433,20 @@ const LongDivision = () => {
         }]);
       }
 
+      // Only set isGameComplete when we're at the last step AND the answer is correct
       if (currentStep === problem.steps.length - 1) {
-        setIsGameComplete(true);
-        // Show confetti on problem completion
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 3000);
-        
-        setFeedback({ 
-          type: 'success', 
-          message: `Problem Complete! +${Math.floor(basePoints * 1.5)} bonus points!` 
-        });
-        setScore(prev => prev + Math.floor(basePoints * 1.5));
+        setTimeout(() => {
+          setIsGameComplete(true);
+          // Show confetti on problem completion
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 3000);
+          
+          setFeedback({ 
+            type: 'success', 
+            message: `Problem Complete! +${Math.floor(basePoints * 1.5)} bonus points!` 
+          });
+          setScore(prev => prev + Math.floor(basePoints * 1.5));
+        }, 1000);
       } else {
         setTimeout(() => {
           setCurrentStep(prev => prev + 1);
@@ -662,14 +670,14 @@ const LongDivision = () => {
         }}>
           <TextField
             value={userAnswer}
-            onChange={(e) => {
-              // Only allow numbers
-              const value = e.target.value.replace(/[^0-9]/g, '');
-              setUserAnswer(value);
+            inputProps={{ 
+              readOnly: true,
+              style: {
+                fontSize: '2rem',
+                textAlign: 'center',
+                fontFamily: 'Fredoka One'
+              }
             }}
-            type="number"
-            pattern="[0-9]*"
-            inputMode="numeric"
             variant="outlined"
             size="large"
             sx={{ 
@@ -679,10 +687,6 @@ const LongDivision = () => {
                 textAlign: 'center',
                 fontFamily: 'Fredoka One'
               }
-            }}
-            inputProps={{
-              inputMode: 'numeric',
-              pattern: '[0-9]*'
             }}
           />
         </Box>
@@ -708,7 +712,8 @@ const LongDivision = () => {
           <Box sx={{ 
             display: 'flex',
             justifyContent: 'center',
-            gap: 2
+            gap: 2,
+            mt: 2
           }}>
             <Button
               variant="outlined"

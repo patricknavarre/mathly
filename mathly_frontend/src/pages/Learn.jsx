@@ -1,26 +1,162 @@
+import React from 'react';
 import { 
   Box, 
   Container, 
   Grid, 
   Paper, 
   Typography,
-  Divider
+  Divider,
+  useTheme
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { 
-  Add as AddIcon,
-  Remove as SubtractIcon,
-  Close as MultiplyIcon,
-  Functions as DivideIcon,
   Speed,
-  EmojiEvents,
   Psychology,
-  Timer
+  Functions as DivideIcon,
+  Close as MultiplyIcon,
+  ArrowForward
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-const Learn = () => {
+const CategoryCard = ({ topic, delay }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        delay: delay * 0.1,
+        duration: 0.5,
+        ease: [0.23, 0.01, 0.32, 1]
+      }}
+    >
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          cursor: 'pointer',
+          background: `linear-gradient(135deg, ${topic.colors[0]}, ${topic.colors[1]})`,
+          color: 'white',
+          borderRadius: 4,
+          transition: 'all 0.4s cubic-bezier(0.23, 0.01, 0.32, 1)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&:hover': {
+            transform: 'translateY(-8px)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+            '& .arrow-icon': {
+              transform: 'translateX(4px)',
+              opacity: 1
+            },
+            '& .hover-overlay': {
+              opacity: 1
+            }
+          }
+        }}
+        onClick={() => navigate(topic.path)}
+      >
+        {/* Background Pattern */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            opacity: 0.1,
+            background: `radial-gradient(circle at 0% 0%, transparent 50%, ${topic.colors[1]} 100%)`,
+            zIndex: 0
+          }}
+        />
+
+        {/* Hover Overlay */}
+        <Box
+          className="hover-overlay"
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            opacity: 0,
+            background: 'rgba(255,255,255,0.1)',
+            transition: 'opacity 0.4s ease',
+            zIndex: 1
+          }}
+        />
+
+        {/* Content */}
+        <Box sx={{ position: 'relative', zIndex: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Box
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
+                borderRadius: '12px',
+                p: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {topic.icon}
+            </Box>
+            <Typography
+              variant="h5"
+              sx={{
+                ml: 2,
+                fontFamily: 'Fredoka One',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              {topic.title}
+              <ArrowForward 
+                className="arrow-icon"
+                sx={{ 
+                  fontSize: 20,
+                  opacity: 0,
+                  transition: 'all 0.3s ease',
+                  transform: 'translateX(-8px)'
+                }} 
+              />
+            </Typography>
+          </Box>
+          <Typography 
+            sx={{ 
+              mb: 3,
+              opacity: 0.9,
+              fontSize: '1.1rem',
+              lineHeight: 1.5
+            }}
+          >
+            {topic.description}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography
+              sx={{
+                display: 'inline-flex',
+                px: 2,
+                py: 0.5,
+                bgcolor: 'rgba(255,255,255,0.2)',
+                borderRadius: '20px',
+                fontSize: '0.9rem',
+                fontWeight: 500
+              }}
+            >
+              {topic.level}
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
+    </motion.div>
+  );
+};
+
+const Learn = () => {
+  const theme = useTheme();
 
   const mathCategories = [
     {
@@ -28,10 +164,10 @@ const Learn = () => {
       topics: [
         {
           title: "Speed Math",
-          description: "Test your math skills against the clock!",
+          description: "Test your math skills against the clock! Race against time while solving fun math problems.",
           icon: <Speed sx={{ fontSize: 40 }} />,
           path: "/learn/speed-math",
-          colors: ['#4CAF50', '#81C784'],
+          colors: ['#4CAF50', '#2E7D32'],
           level: "All Grades"
         }
       ]
@@ -41,10 +177,10 @@ const Learn = () => {
       topics: [
         {
           title: "Word Problems",
-          description: "Challenge your problem-solving skills with engaging word problems!",
+          description: "Challenge your problem-solving skills with engaging word problems that make math fun and practical!",
           icon: <Psychology sx={{ fontSize: 40 }} />,
           path: "/learn/brain-teasers",
-          colors: ['#9C27B0', '#BA68C8'],
+          colors: ['#9C27B0', '#6A1B9A'],
           level: "All Grades"
         }
       ]
@@ -54,10 +190,10 @@ const Learn = () => {
       topics: [
         {
           title: "Long Division",
-          description: "Master 4-digit division step by step",
+          description: "Master 4-digit division step by step with our interactive learning experience. Break down complex problems into simple steps!",
           icon: <DivideIcon sx={{ fontSize: 40 }} />,
           path: "/learn/division/long",
-          colors: ['#FFD93D', '#FFE074'],
+          colors: ['#FFB300', '#FF8F00'],
           level: "Grade 4-5"
         }
       ]
@@ -67,10 +203,10 @@ const Learn = () => {
       topics: [
         {
           title: "Multiplication Practice",
-          description: "Practice multiplication with numbers up to 4 digits",
+          description: "Practice multiplication with numbers up to 4 digits. Build confidence with progressive difficulty levels!",
           icon: <MultiplyIcon sx={{ fontSize: 40 }} />,
           path: "/learn/multiplication",
-          colors: ['#FF6B6B', '#FF8E8E'],
+          colors: ['#FF5252', '#D32F2F'],
           level: "Grade 3-4"
         }
       ]
@@ -78,92 +214,83 @@ const Learn = () => {
   ];
 
   return (
-    <Box sx={{ backgroundColor: 'background.default', minHeight: '90vh', py: 4 }}>
+    <Box 
+      sx={{ 
+        backgroundColor: 'background.default',
+        minHeight: '90vh',
+        py: 6,
+        background: 'linear-gradient(180deg, #f5f5f5 0%, #ffffff 100%)'
+      }}
+    >
       <Container maxWidth="lg">
-        <Typography
-          variant="h3"
-          sx={{
-            mb: 4,
-            color: 'primary.main',
-            fontFamily: 'Fredoka One',
-            textAlign: 'center'
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          What Would You Like to Learn? 🎯
-        </Typography>
+          <Typography
+            variant="h2"
+            sx={{
+              mb: 1,
+              color: 'primary.main',
+              fontFamily: 'Fredoka One',
+              textAlign: 'center',
+              fontSize: { xs: '2.5rem', md: '3.5rem' }
+            }}
+          >
+            What Would You Like to Learn?
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              mb: 8,
+              color: 'text.secondary',
+              textAlign: 'center',
+              fontFamily: 'Fredoka One',
+              opacity: 0.8
+            }}
+          >
+            Choose your adventure and start learning! 🎯
+          </Typography>
+        </motion.div>
 
         <Box sx={{ mb: 6 }}>
           {mathCategories.map((category, categoryIndex) => (
-            <Box key={category.category} sx={{ mb: 6 }}>
-              <Typography
-                variant="h4"
-                sx={{
-                  mb: 3,
-                  color: 'text.primary',
-                  fontFamily: 'Fredoka One',
-                  opacity: 0.9
-                }}
+            <Box key={category.category} sx={{ mb: 8 }}>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
               >
-                {category.category}
-              </Typography>
+                <Typography
+                  variant="h3"
+                  sx={{
+                    mb: 4,
+                    color: 'text.primary',
+                    fontFamily: 'Fredoka One',
+                    opacity: 0.9,
+                    fontSize: { xs: '2rem', md: '2.5rem' }
+                  }}
+                >
+                  {category.category}
+                </Typography>
+              </motion.div>
               
-              <Grid container spacing={3}>
+              <Grid container spacing={4}>
                 {category.topics.map((topic, topicIndex) => (
                   <Grid item xs={12} md={6} key={topic.title}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: topicIndex * 0.1 }}
-                    >
-                      <Paper
-                        sx={{
-                          p: 3,
-                          cursor: 'pointer',
-                          background: `linear-gradient(45deg, ${topic.colors[0]}, ${topic.colors[1]})`,
-                          color: 'white',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            transform: 'translateY(-8px)',
-                            boxShadow: '0 12px 20px rgba(0,0,0,0.1)'
-                          }
-                        }}
-                        onClick={() => navigate(topic.path)}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          {topic.icon}
-                          <Typography
-                            variant="h5"
-                            sx={{
-                              ml: 2,
-                              fontFamily: 'Fredoka One'
-                            }}
-                          >
-                            {topic.title}
-                          </Typography>
-                        </Box>
-                        <Typography sx={{ mb: 2, opacity: 0.9 }}>
-                          {topic.description}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            display: 'inline-block',
-                            px: 2,
-                            py: 0.5,
-                            bgcolor: 'rgba(255,255,255,0.2)',
-                            borderRadius: 2,
-                            fontSize: '0.9rem'
-                          }}
-                        >
-                          {topic.level}
-                        </Typography>
-                      </Paper>
-                    </motion.div>
+                    <CategoryCard topic={topic} delay={categoryIndex + topicIndex} />
                   </Grid>
                 ))}
               </Grid>
               
               {categoryIndex < mathCategories.length - 1 && (
-                <Divider sx={{ mt: 4 }} />
+                <Divider 
+                  sx={{ 
+                    mt: 8,
+                    opacity: 0.1
+                  }} 
+                />
               )}
             </Box>
           ))}

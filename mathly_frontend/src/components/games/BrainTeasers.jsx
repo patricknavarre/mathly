@@ -73,6 +73,39 @@ const BrainTeasers = () => {
     return () => clearInterval(timer);
   }, [isGameActive, timeLeft]);
 
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (!isGameActive) return;
+
+      // Handle number keys
+      if (/^[0-9]$/.test(e.key)) {
+        setUserAnswer(prev => prev + e.key);
+      }
+      // Handle backspace
+      else if (e.key === 'Backspace') {
+        setUserAnswer(prev => prev.slice(0, -1));
+      }
+      // Handle enter
+      else if (e.key === 'Enter' && userAnswer) {
+        handleAnswer();
+      }
+      // Handle hint
+      else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
+        handleShowHint();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [userAnswer, isGameActive, hintsRemaining, showHint]);
+
+  const handleShowHint = () => {
+    if (hintsRemaining > 0 && !showHint) {
+      setHintsRemaining(prev => prev - 1);
+      setShowHint(true);
+    }
+  };
+
   const startGame = () => {
     setIsGameActive(true);
     setScore(0);
@@ -221,9 +254,15 @@ const BrainTeasers = () => {
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
                 <TextField
                   value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
+                  inputProps={{ 
+                    readOnly: true,
+                    style: {
+                      fontSize: '2rem',
+                      textAlign: 'center',
+                      fontFamily: 'Fredoka One'
+                    }
+                  }}
                   variant="outlined"
-                  type="number"
                   size="large"
                   sx={{
                     width: 200,
@@ -251,17 +290,14 @@ const BrainTeasers = () => {
               {/* Hint Button */}
               <Button
                 variant="outlined"
-                startIcon={<Lightbulb />}
-                onClick={() => {
-                  if (hintsRemaining > 0) {
-                    setShowHint(true);
-                    setHintsRemaining(prev => prev - 1);
-                  }
-                }}
+                onClick={handleShowHint}
                 disabled={hintsRemaining === 0 || showHint}
-                sx={{ mt: 2, fontFamily: 'Fredoka One' }}
+                sx={{ 
+                  minWidth: '120px',
+                  fontFamily: 'Fredoka One'
+                }}
               >
-                Hint ({hintsRemaining})
+                Hint (H)
               </Button>
             </Box>
 
@@ -310,6 +346,17 @@ const BrainTeasers = () => {
                 </Paper>
               </motion.div>
             )}
+
+            {/* Keyboard Instructions */}
+            <Box sx={{ 
+              mt: 4, 
+              textAlign: 'center',
+              color: 'text.secondary'
+            }}>
+              <Typography sx={{ fontFamily: 'Fredoka One' }}>
+                Use number keys to type • Enter ↵ to check • Backspace to delete • H for hint
+              </Typography>
+            </Box>
           </>
         )}
       </Paper>
