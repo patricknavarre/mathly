@@ -29,9 +29,20 @@ const Navbar = () => {
         
         {currentUser ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'secondary.main' }}>
-              {currentUser.avatar || currentUser.email[0].toUpperCase()}
-            </Avatar>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                {currentUser.avatar || currentUser.email[0].toUpperCase()}
+              </Avatar>
+              <Typography 
+                sx={{ 
+                  fontFamily: 'Fredoka One',
+                  color: 'white',
+                  display: { xs: 'none', sm: 'block' }
+                }}
+              >
+                {currentUser.displayName || currentUser.email.split('@')[0]}
+              </Typography>
+            </Box>
             <Button 
               color="inherit" 
               onClick={() => navigate('/learn')}

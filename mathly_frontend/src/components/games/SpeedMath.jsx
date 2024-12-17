@@ -3,7 +3,6 @@ import {
   Box, 
   Container, 
   Typography, 
-  TextField, 
   Button, 
   Paper,
   LinearProgress,
@@ -12,6 +11,64 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer, Lightbulb, Speed } from '@mui/icons-material';
+import { playSound } from '../../assets/sounds';
+
+// Add NumberButton component for the number pad
+const NumberButton = ({ number, onClick }) => {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+      style={{
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        border: 'none',
+        backgroundColor: '#4ECDC4',
+        color: 'white',
+        fontSize: '1.5rem',
+        fontFamily: 'Fredoka One',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        transition: 'background-color 0.3s ease'
+      }}
+      onClick={onClick}
+    >
+      {number}
+    </motion.button>
+  );
+};
+
+// Add TimeBonus component at the top
+const TimeBonus = ({ onComplete }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 0 }}
+      animate={{ 
+        opacity: [0, 1, 0],
+        y: -50,
+        scale: [1, 1.2, 1]
+      }}
+      transition={{ duration: 1 }}
+      onAnimationComplete={onComplete}
+      style={{
+        position: 'absolute',
+        right: '20px',
+        top: '50%',
+        color: '#4CAF50',
+        fontFamily: 'Fredoka One',
+        fontSize: '1.5rem',
+        pointerEvents: 'none',
+        zIndex: 10
+      }}
+    >
+      +2s
+    </motion.div>
+  );
+};
 
 const SpeedMath = () => {
   const [problem, setProblem] = useState(null);
@@ -24,6 +81,8 @@ const SpeedMath = () => {
   const [timeLeft, setTimeLeft] = useState(60);
   const [isGameActive, setIsGameActive] = useState(false);
   const [hintsRemaining, setHintsRemaining] = useState(3);
+  const [shakeProblem, setShakeProblem] = useState(false);
+  const [showTimeBonus, setShowTimeBonus] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -42,13 +101,45 @@ const SpeedMath = () => {
     return () => clearInterval(timer);
   }, [isGameActive, timeLeft]);
 
-  const handleInputChange = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setUserAnswer(value);
+  // Add keyboard support
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Handle number keys (0-9)
+      if (/^[0-9]$/.test(e.key)) {
+        handleNumberClick(parseInt(e.key));
+      }
+      // Handle backspace
+      else if (e.key === 'Backspace') {
+        handleBackspace();
+      }
+      // Handle enter for submit
+      else if (e.key === 'Enter' && userAnswer) {
+        handleSubmit();
+      }
+      // Handle 'h' key for hint
+      else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
+        setShowHint(true);
+        setHintsRemaining(prev => prev - 1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [userAnswer, hintsRemaining, showHint]); // Add dependencies
+
+  const handleNumberClick = (number) => {
+    if (userAnswer.length < 5) { // Limit answer length
+      playSound('buttonClick', 0.1);
+      setUserAnswer(prev => prev + number);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e?.preventDefault();
+  const handleBackspace = () => {
+    playSound('buttonClick', 0.1);
+    setUserAnswer(prev => prev.slice(0, -1));
+  };
+
+  const handleSubmit = () => {
     if (userAnswer) {
       handleAnswer();
     }
@@ -108,13 +199,23 @@ const SpeedMath = () => {
 
     const numAnswer = parseInt(userAnswer);
     if (numAnswer === problem.answer) {
+      playSound('correct', 0.15);
       const basePoints = 100;
       const timeBonus = Math.floor((timeLeft / 60) * 50);
       const streakBonus = streak * 10;
       const points = basePoints + timeBonus + streakBonus;
 
-      setScore((prev) => prev + points);
-      setStreak((prev) => prev + 1);
+      setTimeLeft(prev => {
+        const newTime = Math.min(prev + 2, 60);
+        if (newTime > prev) {
+          playSound('timeBonus', 0.1);
+        }
+        return newTime;
+      }); // Cap at 60 seconds
+      setShowTimeBonus(true);
+
+      setScore(prev => prev + points);
+      setStreak(prev => prev + 1);
       setFeedback({
         type: 'success',
         message: `🎉 Correct! +${points} points!`
@@ -127,7 +228,10 @@ const SpeedMath = () => {
         setShowHint(false);
       }, 1000);
     } else {
+      playSound('wrong', 0.15);
       setStreak(0);
+      setShakeProblem(true);
+      setTimeout(() => setShakeProblem(false), 500);
       setFeedback({
         type: 'error',
         message: 'Not quite right. Try again! 💪'
@@ -149,9 +253,17 @@ const SpeedMath = () => {
           p: 4,
           borderRadius: 4,
           background: 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)',
-          position: 'relative'
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
+        {/* Time Bonus Animation */}
+        <AnimatePresence>
+          {showTimeBonus && (
+            <TimeBonus onComplete={() => setShowTimeBonus(false)} />
+          )}
+        </AnimatePresence>
+
         {/* Game Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
           <Typography variant="h4" sx={{ fontFamily: 'Fredoka One', color: 'primary.main' }}>
@@ -227,79 +339,90 @@ const SpeedMath = () => {
             {/* Problem Display */}
             {problem && (
               <Box sx={{ textAlign: 'center', mb: 4 }}>
-                <Typography
-                  variant="h2"
-                  sx={{
-                    fontFamily: 'Fredoka One',
-                    mb: 2
-                  }}
+                <motion.div
+                  animate={{ scale: shakeProblem ? [1, 1.1, 0.9, 1] : 1 }}
+                  transition={{ duration: 0.5 }}
                 >
-                  {problem.num1} {problem.operation} {problem.num2}
-                </Typography>
+                  <Typography
+                    variant="h2"
+                    sx={{
+                      fontFamily: 'Fredoka One',
+                      mb: 2
+                    }}
+                  >
+                    {problem.num1} {problem.operation} {problem.num2}
+                  </Typography>
+                </motion.div>
 
-                {/* Input Area */}
-                <form onSubmit={handleSubmit}>
-                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
-                    <TextField
-                      value={userAnswer}
-                      onChange={handleInputChange}
-                      type="number"
-                      pattern="[0-9]*"
-                      inputMode="numeric"
-                      variant="outlined"
-                      size="large"
-                      autoComplete="off"
-                      sx={{
-                        width: 200,
-                        '& input': {
-                          fontSize: '2rem',
-                          textAlign: 'center',
-                          fontFamily: 'Fredoka One'
-                        }
-                      }}
-                      inputProps={{
-                        inputMode: 'numeric',
-                        pattern: '[0-9]*',
-                        style: {
-                          fontSize: '2rem',
-                          textAlign: 'center',
-                          fontFamily: 'Fredoka One'
-                        }
-                      }}
+                {/* Answer Display */}
+                <Box sx={{ 
+                  width: '200px',
+                  height: '60px',
+                  margin: '0 auto',
+                  border: '2px solid',
+                  borderColor: 'primary.main',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 3,
+                  backgroundColor: 'white'
+                }}>
+                  <Typography variant="h3" sx={{ fontFamily: 'Fredoka One' }}>
+                    {userAnswer || ' '}
+                  </Typography>
+                </Box>
+
+                {/* Number Pad */}
+                <Box sx={{ 
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(5, 1fr)',
+                  gap: 2,
+                  maxWidth: '400px',
+                  margin: '0 auto',
+                  mb: 3
+                }}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                    <NumberButton
+                      key={num}
+                      number={num}
+                      onClick={() => handleNumberClick(num)}
                     />
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                      disabled={!userAnswer}
-                      sx={{
-                        py: 2,
-                        px: 4,
-                        fontFamily: 'Fredoka One'
-                      }}
-                    >
-                      Check Answer
-                    </Button>
-                  </Box>
-                </form>
+                  ))}
+                </Box>
 
-                {/* Hint Button */}
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    if (hintsRemaining > 0) {
-                      setShowHint(true);
-                      setHintsRemaining(prev => prev - 1);
-                    }
-                  }}
-                  disabled={hintsRemaining === 0 || showHint}
-                  sx={{ 
-                    mt: 2,
-                    fontFamily: 'Fredoka One'
-                  }}
-                >
-                  Hint ({hintsRemaining} left)
-                </Button>
+                {/* Control Buttons */}
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleBackspace}
+                    disabled={!userAnswer}
+                    sx={{ fontFamily: 'Fredoka One' }}
+                  >
+                    ⌫
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleSubmit}
+                    disabled={!userAnswer}
+                    sx={{ fontFamily: 'Fredoka One', minWidth: '120px' }}
+                  >
+                    Check
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      if (hintsRemaining > 0) {
+                        setShowHint(true);
+                        setHintsRemaining(prev => prev - 1);
+                      }
+                    }}
+                    disabled={hintsRemaining === 0 || showHint}
+                    sx={{ fontFamily: 'Fredoka One' }}
+                  >
+                    Hint ({hintsRemaining})
+                  </Button>
+                </Box>
               </Box>
             )}
 
