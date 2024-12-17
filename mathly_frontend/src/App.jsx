@@ -51,6 +51,8 @@ import LongDivision from './components/games/LongDivision';
 import MultiplicationPractice from './components/games/MultiplicationPractice';
 import SpeedMath from './components/games/SpeedMath';
 import BrainTeasers from './components/games/BrainTeasers';
+import VisualAddition from './components/games/VisualAddition';
+import VisualSubtraction from './components/games/VisualSubtraction';
 
 // Add ProtectedRoute component
 const ProtectedRoute = ({ children }) => {
@@ -96,6 +98,16 @@ function App() {
             <Route path="/learn" element={
               <ProtectedRoute>
                 <Learn />
+              </ProtectedRoute>
+            } />
+            <Route path="/learn/elementary/addition" element={
+              <ProtectedRoute>
+                <VisualAddition />
+              </ProtectedRoute>
+            } />
+            <Route path="/learn/elementary/subtraction" element={
+              <ProtectedRoute>
+                <VisualSubtraction />
               </ProtectedRoute>
             } />
             <Route path="/learn/multiplication" element={

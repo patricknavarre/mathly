@@ -14,7 +14,9 @@ import {
   Psychology,
   Functions as DivideIcon,
   Close as MultiplyIcon,
-  ArrowForward
+  ArrowForward,
+  Add,
+  Remove
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -159,6 +161,27 @@ const Learn = () => {
   const theme = useTheme();
 
   const mathCategories = [
+    {
+      category: "Elementary",
+      topics: [
+        {
+          title: "Visual Addition",
+          description: "Learn addition with fun animations! Count animals, blocks, and other cool objects.",
+          icon: <Add sx={{ fontSize: 40 }} />,
+          path: "/learn/elementary/addition",
+          colors: ['#FF9800', '#F57C00'],
+          level: "Grade 1-2"
+        },
+        {
+          title: "Visual Subtraction",
+          description: "Master subtraction by playing with animated objects. Watch them disappear like magic!",
+          icon: <Remove sx={{ fontSize: 40 }} />,
+          path: "/learn/elementary/subtraction",
+          colors: ['#9C27B0', '#7B1FA2'],
+          level: "Grade 1-2"
+        }
+      ]
+    },
     {
       category: "Quick Games",
       topics: [
