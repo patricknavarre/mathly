@@ -316,27 +316,36 @@ const LongDivision = () => {
   // Add keyboard support
   useEffect(() => {
     const handleKeyPress = (e) => {
-      // Handle number keys
-      if (/^[0-9]$/.test(e.key)) {
-        setUserAnswer(prev => prev + e.key);
-      }
-      // Handle backspace
-      else if (e.key === 'Backspace') {
-        handleBackspace();
-      }
-      // Handle enter
-      else if (e.key === 'Enter' && userAnswer) {
-        handleCheckAnswer();
-      }
-      // Handle hint
-      else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
-        handleShowHint();
+      // Only handle keyboard events on desktop
+      if (window.innerWidth > 768) {
+        // Handle number keys
+        if (/^[0-9]$/.test(e.key)) {
+          setUserAnswer(prev => prev + e.key);
+        }
+        // Handle backspace
+        else if (e.key === 'Backspace') {
+          handleBackspace();
+        }
+        // Handle enter
+        else if (e.key === 'Enter' && userAnswer) {
+          handleCheckAnswer();
+        }
+        // Handle hint
+        else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
+          handleShowHint();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [userAnswer, hintsRemaining, showHint]);
+
+  const handleInputChange = (e) => {
+    // Only allow numbers
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setUserAnswer(value);
+  };
 
   const startNewProblem = () => {
     const newProblem = generateProblem(difficulty);
@@ -670,19 +679,24 @@ const LongDivision = () => {
         }}>
           <TextField
             value={userAnswer}
-            inputProps={{ 
-              readOnly: true,
-              style: {
-                fontSize: '2rem',
-                textAlign: 'center',
-                fontFamily: 'Fredoka One'
-              }
-            }}
+            onChange={handleInputChange}
+            type="number"
+            pattern="[0-9]*"
+            inputMode="numeric"
             variant="outlined"
             size="large"
             sx={{ 
               width: 200,
               '& input': {
+                fontSize: '2rem',
+                textAlign: 'center',
+                fontFamily: 'Fredoka One'
+              }
+            }}
+            inputProps={{
+              inputMode: 'numeric',
+              pattern: '[0-9]*',
+              style: {
                 fontSize: '2rem',
                 textAlign: 'center',
                 fontFamily: 'Fredoka One'

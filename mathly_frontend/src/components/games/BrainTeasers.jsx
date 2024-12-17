@@ -75,29 +75,37 @@ const BrainTeasers = () => {
 
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (!isGameActive) return;
+      if (window.innerWidth > 768) {
+        if (!isGameActive) return;
 
-      // Handle number keys
-      if (/^[0-9]$/.test(e.key)) {
-        setUserAnswer(prev => prev + e.key);
-      }
-      // Handle backspace
-      else if (e.key === 'Backspace') {
-        setUserAnswer(prev => prev.slice(0, -1));
-      }
-      // Handle enter
-      else if (e.key === 'Enter' && userAnswer) {
-        handleAnswer();
-      }
-      // Handle hint
-      else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
-        handleShowHint();
+        // Handle number keys
+        if (/^[0-9]$/.test(e.key)) {
+          setUserAnswer(prev => prev + e.key);
+        }
+        // Handle backspace
+        else if (e.key === 'Backspace') {
+          setUserAnswer(prev => prev.slice(0, -1));
+        }
+        // Handle enter
+        else if (e.key === 'Enter' && userAnswer) {
+          handleAnswer();
+        }
+        // Handle hint
+        else if (e.key.toLowerCase() === 'h' && hintsRemaining > 0 && !showHint) {
+          handleShowHint();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [userAnswer, isGameActive, hintsRemaining, showHint]);
+
+  const handleInputChange = (e) => {
+    // Only allow numbers
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setUserAnswer(value);
+  };
 
   const handleShowHint = () => {
     if (hintsRemaining > 0 && !showHint) {
@@ -254,19 +262,24 @@ const BrainTeasers = () => {
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
                 <TextField
                   value={userAnswer}
-                  inputProps={{ 
-                    readOnly: true,
-                    style: {
-                      fontSize: '2rem',
-                      textAlign: 'center',
-                      fontFamily: 'Fredoka One'
-                    }
-                  }}
+                  onChange={handleInputChange}
+                  type="number"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
                   variant="outlined"
                   size="large"
                   sx={{
                     width: 200,
                     '& input': {
+                      fontSize: '2rem',
+                      textAlign: 'center',
+                      fontFamily: 'Fredoka One'
+                    }
+                  }}
+                  inputProps={{
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*',
+                    style: {
                       fontSize: '2rem',
                       textAlign: 'center',
                       fontFamily: 'Fredoka One'
