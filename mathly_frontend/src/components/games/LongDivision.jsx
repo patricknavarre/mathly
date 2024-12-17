@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Container, 
@@ -301,73 +301,12 @@ const LongDivision = () => {
   const [showHint, setShowHint] = useState(false);
   const [workingSteps, setWorkingSteps] = useState([]);
   const [difficulty, setDifficulty] = useState('EASY');
-  const [problemCount, setProblemCount] = useState(0);
+  const [showStreakMultiplier, setShowStreakMultiplier] = useState(false);
+  const [problemsCompleted, setProblemsCompleted] = useState(0);
   const [hintsRemaining, setHintsRemaining] = useState(3);
   const [isGameComplete, setIsGameComplete] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showStreakMultiplier, setShowStreakMultiplier] = useState(false);
-
-  const handleCheckAnswer = () => {
-    if (!userAnswer || !problem?.steps[currentStep]) return;
-
-    const currentStepData = problem.steps[currentStep];
-    if (userAnswer === currentStepData.expectedAnswer) {
-      const basePoints = DIFFICULTY_LEVELS[difficulty].maxScore / (problem.steps.length / 2);
-      const points = showHint ? Math.floor(basePoints / 2) : basePoints;
-      
-      setScore(prev => prev + points);
-      setStreak(prev => prev + 1);
-      
-      setShowStreakMultiplier(true);
-      setTimeout(() => setShowStreakMultiplier(false), 1000);
-
-      setFeedback({ 
-        type: 'success', 
-        message: `Correct! +${points} points${streak > 0 ? ` (${streak + 1}x streak!)` : ''}`
-      });
-
-      if (currentStepData.type === 'multiply') {
-        setWorkingSteps(prev => [...prev, {
-          ...currentStepData,
-          value: userAnswer,
-          position: Math.floor(currentStep / 2)
-        }]);
-      }
-
-      if (currentStep === problem.steps.length - 1) {
-        setIsGameComplete(true);
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 3000);
-        
-        setFeedback({ 
-          type: 'success', 
-          message: `Problem Complete! +${Math.floor(basePoints * 1.5)} bonus points!` 
-        });
-        setScore(prev => prev + Math.floor(basePoints * 1.5));
-      } else {
-        setTimeout(() => {
-          setCurrentStep(prev => prev + 1);
-          setUserAnswer('');
-          setFeedback(null);
-          setShowHint(false);
-        }, 1000);
-      }
-    } else {
-      setStreak(0);
-      setFeedback({ type: 'error', message: 'Try again!' });
-    }
-  };
-
-  const handleShowHint = () => {
-    if (hintsRemaining > 0 && !showHint) {
-      setHintsRemaining(prev => prev - 1);
-      setShowHint(true);
-    }
-  };
-
-  const handleBackspace = () => {
-    setUserAnswer(prev => prev.slice(0, -1));
-  };
+  const PROBLEMS_PER_LEVEL = 5;
 
   // Initialize game
   useEffect(() => {
@@ -377,13 +316,9 @@ const LongDivision = () => {
   // Add keyboard support
   useEffect(() => {
     const handleKeyPress = (e) => {
-      // Handle number keys
-      if (/^[0-9]$/.test(e.key)) {
-        setUserAnswer(prev => prev + e.key);
-      }
-      // Handle backspace
-      else if (e.key === 'Backspace') {
-        setUserAnswer(prev => prev.slice(0, -1));
+      // Only handle special keys, let TextField handle numbers
+      if (e.key === 'Backspace') {
+        handleBackspace();
       }
       // Handle enter
       else if (e.key === 'Enter' && userAnswer) {
@@ -397,7 +332,7 @@ const LongDivision = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [userAnswer, hintsRemaining, showHint, handleCheckAnswer, handleShowHint]);
+  }, [userAnswer, hintsRemaining, showHint]);
 
   const startNewProblem = () => {
     const newProblem = generateProblem(difficulty);
@@ -406,7 +341,7 @@ const LongDivision = () => {
     setUserAnswer('');
     setWorkingSteps([]);
     setShowHint(false);
-    setProblemCount(prev => prev + 1);
+    setProblemsCompleted(prev => prev + 1);
     generateSteps(newProblem);
   };
 
@@ -465,9 +400,68 @@ const LongDivision = () => {
     setProblem(prev => ({ ...prev, steps }));
   };
 
-  const handleNumberClick = (number) => {
-    const newAnswer = userAnswer + number.toString();
-    setUserAnswer(newAnswer);
+  const handleCheckAnswer = () => {
+    if (!userAnswer || !problem?.steps[currentStep]) return;
+
+    const currentStepData = problem.steps[currentStep];
+    if (userAnswer === currentStepData.expectedAnswer) {
+      const basePoints = DIFFICULTY_LEVELS[difficulty].maxScore / (problem.steps.length / 2);
+      const points = showHint ? Math.floor(basePoints / 2) : basePoints;
+      
+      setScore(prev => prev + points);
+      setStreak(prev => prev + 1);
+      
+      // Show streak multiplier animation
+      setShowStreakMultiplier(true);
+      setTimeout(() => setShowStreakMultiplier(false), 1000);
+
+      setFeedback({ 
+        type: 'success', 
+        message: `Correct! +${points} points${streak > 0 ? ` (${streak + 1}x streak!)` : ''}`
+      });
+
+      if (currentStepData.type === 'multiply') {
+        setWorkingSteps(prev => [...prev, {
+          ...currentStepData,
+          value: userAnswer,
+          position: Math.floor(currentStep / 2)
+        }]);
+      }
+
+      if (currentStep === problem.steps.length - 1) {
+        setIsGameComplete(true);
+        // Show confetti on problem completion
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
+        
+        setFeedback({ 
+          type: 'success', 
+          message: `Problem Complete! +${Math.floor(basePoints * 1.5)} bonus points!` 
+        });
+        setScore(prev => prev + Math.floor(basePoints * 1.5));
+      } else {
+        setTimeout(() => {
+          setCurrentStep(prev => prev + 1);
+          setUserAnswer('');
+          setFeedback(null);
+          setShowHint(false);
+        }, 1000);
+      }
+    } else {
+      setStreak(0);
+      setFeedback({ type: 'error', message: 'Try again!' });
+    }
+  };
+
+  const handleShowHint = () => {
+    if (hintsRemaining > 0 && !showHint) {
+      setHintsRemaining(prev => prev - 1);
+      setShowHint(true);
+    }
+  };
+
+  const handleBackspace = () => {
+    setUserAnswer(prev => prev.slice(0, -1));
   };
 
   // Calculate overall progress for the climbing character
@@ -477,8 +471,6 @@ const LongDivision = () => {
   };
 
   if (!problem) return null;
-
-  
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -666,19 +658,18 @@ const LongDivision = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          mb: 3,
-          position: 'relative'
+          mb: 3
         }}>
           <TextField
             value={userAnswer}
-            inputProps={{ 
-              readOnly: true,
-              style: {
-                fontSize: '2.5rem',
-                textAlign: 'center',
-                fontFamily: 'Fredoka One'
-              }
+            onChange={(e) => {
+              // Only allow numbers
+              const value = e.target.value.replace(/[^0-9]/g, '');
+              setUserAnswer(value);
             }}
+            type="number"
+            pattern="[0-9]*"
+            inputMode="numeric"
             variant="outlined"
             size="large"
             sx={{ 
@@ -688,6 +679,10 @@ const LongDivision = () => {
                 textAlign: 'center',
                 fontFamily: 'Fredoka One'
               }
+            }}
+            inputProps={{
+              inputMode: 'numeric',
+              pattern: '[0-9]*'
             }}
           />
         </Box>
