@@ -245,6 +245,15 @@ const Learn = () => {
           colors: ["#2196F3", "#1976D2"],
           level: "Grade 3-4",
         },
+        {
+          title: "Fraction Operations",
+          description:
+            "Practice adding and subtracting fractions with visual aids and step-by-step guidance!",
+          icon: <Add sx={{ fontSize: 40 }} />,
+          path: "/learn/fractions/operations",
+          colors: ["#9575CD", "#5E35B1"],
+          level: "Grade 3-4",
+        },
       ],
     },
     {

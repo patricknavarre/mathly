@@ -59,6 +59,7 @@ import BrainTeasers from "./components/games/BrainTeasers";
 import VisualAddition from "./components/games/VisualAddition";
 import VisualSubtraction from "./components/games/VisualSubtraction";
 import Fractions from "./components/games/Fractions";
+import FractionOperations from "./components/games/FractionOperations";
 
 // Add ProtectedRoute component
 const ProtectedRoute = ({ children }) => {
@@ -136,6 +137,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Fractions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/learn/fractions/operations"
+              element={
+                <ProtectedRoute>
+                  <FractionOperations />
                 </ProtectedRoute>
               }
             />
