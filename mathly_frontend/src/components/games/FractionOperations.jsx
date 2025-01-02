@@ -25,6 +25,22 @@ import { Add, Remove, Check, Close } from "@mui/icons-material";
 import confetti from "canvas-confetti";
 
 const FractionInput = ({ label, value, onChange, disabled = false }) => {
+  const handleNumeratorChange = (e) => {
+    const val = e.target.value;
+    // Allow empty string or valid numbers
+    if (val === "" || !isNaN(val)) {
+      onChange({ ...value, numerator: val === "" ? 0 : parseInt(val) });
+    }
+  };
+
+  const handleDenominatorChange = (e) => {
+    const val = e.target.value;
+    // Allow empty string but convert to 1, or valid numbers greater than 0
+    if (val === "" || (!isNaN(val) && parseInt(val) > 0)) {
+      onChange({ ...value, denominator: val === "" ? 1 : parseInt(val) });
+    }
+  };
+
   return (
     <Box sx={{ textAlign: "center" }}>
       <Typography variant="subtitle1" sx={{ mb: 1, fontFamily: "Fredoka One" }}>
@@ -41,9 +57,7 @@ const FractionInput = ({ label, value, onChange, disabled = false }) => {
         <TextField
           type="number"
           value={value.numerator}
-          onChange={(e) =>
-            onChange({ ...value, numerator: parseInt(e.target.value) || 0 })
-          }
+          onChange={handleNumeratorChange}
           disabled={disabled}
           inputProps={{ min: 0, max: 99 }}
           sx={{ width: "70px" }}
@@ -54,9 +68,7 @@ const FractionInput = ({ label, value, onChange, disabled = false }) => {
         <TextField
           type="number"
           value={value.denominator}
-          onChange={(e) =>
-            onChange({ ...value, denominator: parseInt(e.target.value) || 1 })
-          }
+          onChange={handleDenominatorChange}
           disabled={disabled}
           inputProps={{ min: 1, max: 99 }}
           sx={{ width: "70px" }}
