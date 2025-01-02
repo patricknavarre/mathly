@@ -60,6 +60,7 @@ import VisualAddition from "./components/games/VisualAddition";
 import VisualSubtraction from "./components/games/VisualSubtraction";
 import Fractions from "./components/games/Fractions";
 import FractionOperations from "./components/games/FractionOperations";
+import Factors from "./components/games/Factors";
 
 // Add ProtectedRoute component
 const ProtectedRoute = ({ children }) => {
@@ -177,6 +178,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SpeedMath />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/learn/factors"
+              element={
+                <ProtectedRoute>
+                  <Factors />
                 </ProtectedRoute>
               }
             />

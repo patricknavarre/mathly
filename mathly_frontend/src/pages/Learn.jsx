@@ -18,6 +18,7 @@ import {
   Add,
   Remove,
   PieChart,
+  Functions,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
@@ -248,11 +249,25 @@ const Learn = () => {
         {
           title: "Fraction Operations",
           description:
-            "Practice adding and subtracting fractions with visual aids and step-by-step guidance!",
+            "Practice adding and subtracting fractions with step-by-step visual guidance!",
           icon: <Add sx={{ fontSize: 40 }} />,
-          path: "/learn/fractions/operations",
+          path: "/learn/fraction-operations",
+          colors: ["#00BCD4", "#0097A7"],
+          level: "Grade 4-5",
+        },
+      ],
+    },
+    {
+      category: "Number Theory",
+      topics: [
+        {
+          title: "Factor Fun",
+          description:
+            "Discover factors through interactive games and challenges. Learn to find all factors of a number!",
+          icon: <Functions sx={{ fontSize: 40 }} />,
+          path: "/learn/factors",
           colors: ["#9575CD", "#5E35B1"],
-          level: "Grade 3-4",
+          level: "Grade 4-6",
         },
       ],
     },
