@@ -34,6 +34,8 @@ const CategoryCard = ({ topic, delay }) => {
         duration: 0.5,
         ease: [0.23, 0.01, 0.32, 1],
       }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       <Paper
         elevation={0}
@@ -42,19 +44,23 @@ const CategoryCard = ({ topic, delay }) => {
           cursor: "pointer",
           background: `linear-gradient(135deg, ${topic.colors[0]}, ${topic.colors[1]})`,
           color: "white",
-          borderRadius: 4,
+          borderRadius: "24px",
           transition: "all 0.4s cubic-bezier(0.23, 0.01, 0.32, 1)",
           position: "relative",
           overflow: "hidden",
+          backdropFilter: "blur(10px)",
           "&:hover": {
             transform: "translateY(-8px)",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+            boxShadow: `0 20px 60px ${topic.colors[1]}40`,
             "& .arrow-icon": {
               transform: "translateX(4px)",
               opacity: 1,
             },
             "& .hover-overlay": {
               opacity: 1,
+            },
+            "& .icon-container": {
+              transform: "scale(1.1) rotate(5deg)",
             },
           },
         }}
@@ -69,7 +75,12 @@ const CategoryCard = ({ topic, delay }) => {
             right: 0,
             bottom: 0,
             opacity: 0.1,
-            background: `radial-gradient(circle at 0% 0%, transparent 50%, ${topic.colors[1]} 100%)`,
+            background: `
+              radial-gradient(circle at 0% 0%, transparent 50%, ${topic.colors[1]} 100%),
+              linear-gradient(45deg, ${topic.colors[0]}20 25%, transparent 25%, transparent 75%, ${topic.colors[1]}20 75%),
+              linear-gradient(-45deg, ${topic.colors[0]}20 25%, transparent 25%, transparent 75%, ${topic.colors[1]}20 75%)
+            `,
+            backgroundSize: "100% 100%, 60px 60px, 60px 60px",
             zIndex: 0,
           }}
         />
@@ -94,13 +105,17 @@ const CategoryCard = ({ topic, delay }) => {
         <Box sx={{ position: "relative", zIndex: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <Box
+              className="icon-container"
               sx={{
                 bgcolor: "rgba(255,255,255,0.2)",
-                borderRadius: "12px",
-                p: 1,
+                borderRadius: "16px",
+                p: 1.5,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                transition: "transform 0.3s ease",
+                backdropFilter: "blur(4px)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
               }}
             >
               {topic.icon}
@@ -113,13 +128,15 @@ const CategoryCard = ({ topic, delay }) => {
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
+                fontSize: "1.5rem",
+                textShadow: "0 2px 4px rgba(0,0,0,0.1)",
               }}
             >
               {topic.title}
               <ArrowForward
                 className="arrow-icon"
                 sx={{
-                  fontSize: 20,
+                  fontSize: 24,
                   opacity: 0,
                   transition: "all 0.3s ease",
                   transform: "translateX(-8px)",
@@ -130,9 +147,10 @@ const CategoryCard = ({ topic, delay }) => {
           <Typography
             sx={{
               mb: 3,
-              opacity: 0.9,
+              opacity: 0.95,
               fontSize: "1.1rem",
-              lineHeight: 1.5,
+              lineHeight: 1.6,
+              textShadow: "0 1px 2px rgba(0,0,0,0.1)",
             }}
           >
             {topic.description}
@@ -141,12 +159,14 @@ const CategoryCard = ({ topic, delay }) => {
             <Typography
               sx={{
                 display: "inline-flex",
-                px: 2,
-                py: 0.5,
+                px: 2.5,
+                py: 0.75,
                 bgcolor: "rgba(255,255,255,0.2)",
                 borderRadius: "20px",
-                fontSize: "0.9rem",
-                fontWeight: 500,
+                fontSize: "0.95rem",
+                fontWeight: 600,
+                backdropFilter: "blur(4px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               }}
             >
               {topic.level}
@@ -163,58 +183,7 @@ const Learn = () => {
 
   const mathCategories = [
     {
-      category: "Elementary",
-      topics: [
-        {
-          title: "Visual Addition",
-          description:
-            "Learn addition with fun animations! Count animals, blocks, and other cool objects.",
-          icon: <Add sx={{ fontSize: 40 }} />,
-          path: "/learn/elementary/addition",
-          colors: ["#FF9800", "#F57C00"],
-          level: "Grade 1-2",
-        },
-        {
-          title: "Visual Subtraction",
-          description:
-            "Master subtraction by playing with animated objects. Watch them disappear like magic!",
-          icon: <Remove sx={{ fontSize: 40 }} />,
-          path: "/learn/elementary/subtraction",
-          colors: ["#9C27B0", "#7B1FA2"],
-          level: "Grade 1-2",
-        },
-      ],
-    },
-    {
-      category: "Fractions",
-      topics: [
-        {
-          title: "Fraction Explorer",
-          description:
-            "Visualize and compare fractions using interactive bar models, pie charts, and number lines!",
-          icon: <PieChart sx={{ fontSize: 40 }} />,
-          path: "/learn/fractions",
-          colors: ["#2196F3", "#1976D2"],
-          level: "Grade 3-4",
-        },
-      ],
-    },
-    {
-      category: "Quick Games",
-      topics: [
-        {
-          title: "Speed Math",
-          description:
-            "Test your math skills against the clock! Race against time while solving fun math problems.",
-          icon: <Speed sx={{ fontSize: 40 }} />,
-          path: "/learn/speed-math",
-          colors: ["#4CAF50", "#2E7D32"],
-          level: "All Grades",
-        },
-      ],
-    },
-    {
-      category: "Brain Teasers",
+      category: "Interactive Games",
       topics: [
         {
           title: "Word Problems",
@@ -223,6 +192,15 @@ const Learn = () => {
           icon: <Psychology sx={{ fontSize: 40 }} />,
           path: "/learn/brain-teasers",
           colors: ["#9C27B0", "#6A1B9A"],
+          level: "All Grades",
+        },
+        {
+          title: "Speed Math",
+          description:
+            "Test your math skills against the clock! Race against time while solving fun math problems.",
+          icon: <Speed sx={{ fontSize: 40 }} />,
+          path: "/learn/speed-math",
+          colors: ["#4CAF50", "#2E7D32"],
           level: "All Grades",
         },
       ],
@@ -255,95 +233,108 @@ const Learn = () => {
         },
       ],
     },
+    {
+      category: "Fractions",
+      topics: [
+        {
+          title: "Fraction Explorer",
+          description:
+            "Visualize and compare fractions using interactive bar models, pie charts, and number lines!",
+          icon: <PieChart sx={{ fontSize: 40 }} />,
+          path: "/learn/fractions",
+          colors: ["#2196F3", "#1976D2"],
+          level: "Grade 3-4",
+        },
+      ],
+    },
+    {
+      category: "Elementary",
+      topics: [
+        {
+          title: "Visual Addition",
+          description:
+            "Learn addition with fun animations! Count animals, blocks, and other cool objects.",
+          icon: <Add sx={{ fontSize: 40 }} />,
+          path: "/learn/elementary/addition",
+          colors: ["#FF9800", "#F57C00"],
+          level: "Grade 1-2",
+        },
+        {
+          title: "Visual Subtraction",
+          description:
+            "Master subtraction by playing with animated objects. Watch them disappear like magic!",
+          icon: <Remove sx={{ fontSize: 40 }} />,
+          path: "/learn/elementary/subtraction",
+          colors: ["#9C27B0", "#7B1FA2"],
+          level: "Grade 1-2",
+        },
+      ],
+    },
   ];
 
   return (
-    <Box
-      sx={{
-        backgroundColor: "background.default",
-        minHeight: "90vh",
-        py: 6,
-        background: "linear-gradient(180deg, #f5f5f5 0%, #ffffff 100%)",
-      }}
-    >
-      <Container maxWidth="lg">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Typography
+          variant="h2"
+          align="center"
+          sx={{
+            mb: 1,
+            fontFamily: "Fredoka One",
+            background: "linear-gradient(45deg, #FF6B6B 30%, #4ECDC4 90%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            fontSize: { xs: "2.5rem", sm: "3rem", md: "3.5rem" },
+          }}
         >
-          <Typography
-            variant="h2"
-            sx={{
-              mb: 1,
-              color: "primary.main",
-              fontFamily: "Fredoka One",
-              textAlign: "center",
-              fontSize: { xs: "2.5rem", md: "3.5rem" },
-            }}
+          What Would You Like to Learn?
+        </Typography>
+        <Typography
+          variant="h5"
+          align="center"
+          color="text.secondary"
+          sx={{ mb: 6, maxWidth: "800px", mx: "auto" }}
+        >
+          Choose your adventure and start learning! 🎯
+        </Typography>
+      </motion.div>
+
+      {mathCategories.map((category, categoryIndex) => (
+        <Box key={category.category} sx={{ mb: 6 }}>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: categoryIndex * 0.1, duration: 0.5 }}
           >
-            What Would You Like to Learn?
-          </Typography>
-          <Typography
-            variant="h5"
-            sx={{
-              mb: 8,
-              color: "text.secondary",
-              textAlign: "center",
-              fontFamily: "Fredoka One",
-              opacity: 0.8,
-            }}
-          >
-            Choose your adventure and start learning! 🎯
-          </Typography>
-        </motion.div>
-
-        <Box sx={{ mb: 6 }}>
-          {mathCategories.map((category, categoryIndex) => (
-            <Box key={category.category} sx={{ mb: 8 }}>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
-              >
-                <Typography
-                  variant="h3"
-                  sx={{
-                    mb: 4,
-                    color: "text.primary",
-                    fontFamily: "Fredoka One",
-                    opacity: 0.9,
-                    fontSize: { xs: "2rem", md: "2.5rem" },
-                  }}
-                >
-                  {category.category}
-                </Typography>
-              </motion.div>
-
-              <Grid container spacing={4}>
-                {category.topics.map((topic, topicIndex) => (
-                  <Grid item xs={12} md={6} key={topic.title}>
-                    <CategoryCard
-                      topic={topic}
-                      delay={categoryIndex + topicIndex}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
-
-              {categoryIndex < mathCategories.length - 1 && (
-                <Divider
-                  sx={{
-                    mt: 8,
-                    opacity: 0.1,
-                  }}
+            <Typography
+              variant="h4"
+              sx={{
+                mb: 3,
+                fontFamily: "Fredoka One",
+                color: "text.primary",
+                opacity: 0.9,
+              }}
+            >
+              {category.category}
+            </Typography>
+          </motion.div>
+          <Grid container spacing={3}>
+            {category.topics.map((topic, topicIndex) => (
+              <Grid item xs={12} md={6} key={topic.title}>
+                <CategoryCard
+                  topic={topic}
+                  delay={categoryIndex * 4 + topicIndex}
                 />
-              )}
-            </Box>
-          ))}
+              </Grid>
+            ))}
+          </Grid>
         </Box>
-      </Container>
-    </Box>
+      ))}
+    </Container>
   );
 };
 
