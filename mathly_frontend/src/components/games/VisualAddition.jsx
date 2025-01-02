@@ -1,25 +1,25 @@
-import { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Button, 
-  Paper,
-  Grid
-} from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
+/**
+ * Copyright (c) 2024 Patrick Navarre
+ *
+ * This source code is licensed under the MIT License - see the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import { useState, useEffect } from "react";
+import { Box, Container, Typography, Button, Paper, Grid } from "@mui/material";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 
 // Array of fun emoji objects to use
 const visualObjects = [
-  { emoji: '🐶', name: 'puppy' },
-  { emoji: '🐱', name: 'kitten' },
-  { emoji: '🐰', name: 'bunny' },
-  { emoji: '🦊', name: 'fox' },
-  { emoji: '🦁', name: 'lion' },
-  { emoji: '🐼', name: 'panda' },
-  { emoji: '🦄', name: 'unicorn' },
-  { emoji: '🐸', name: 'frog' }
+  { emoji: "🐶", name: "puppy" },
+  { emoji: "🐱", name: "kitten" },
+  { emoji: "🐰", name: "bunny" },
+  { emoji: "🦊", name: "fox" },
+  { emoji: "🦁", name: "lion" },
+  { emoji: "🐼", name: "panda" },
+  { emoji: "🦄", name: "unicorn" },
+  { emoji: "🐸", name: "frog" },
 ];
 
 const VisualObject = ({ emoji, delay }) => {
@@ -27,17 +27,17 @@ const VisualObject = ({ emoji, delay }) => {
     <motion.div
       initial={{ scale: 0, rotate: -180 }}
       animate={{ scale: 1, rotate: 0 }}
-      transition={{ 
+      transition={{
         type: "spring",
         stiffness: 260,
         damping: 20,
-        delay: delay * 0.1
+        delay: delay * 0.1,
       }}
       style={{
-        fontSize: '3rem',
-        display: 'inline-block',
-        margin: '0.2rem',
-        cursor: 'pointer'
+        fontSize: "3rem",
+        display: "inline-block",
+        margin: "0.2rem",
+        cursor: "pointer",
       }}
       whileHover={{ scale: 1.2, rotate: 10 }}
       whileTap={{ scale: 0.9 }}
@@ -65,18 +65,19 @@ const VisualAddition = () => {
     const wrongAnswers = [
       Math.max(1, answer - 1),
       answer + 1,
-      Math.max(1, answer + 2)
-    ].filter(a => a !== answer);
+      Math.max(1, answer + 2),
+    ].filter((a) => a !== answer);
 
     // Randomly select the object to use
-    const newObject = visualObjects[Math.floor(Math.random() * visualObjects.length)];
+    const newObject =
+      visualObjects[Math.floor(Math.random() * visualObjects.length)];
     setCurrentObject(newObject);
 
     return {
       num1,
       num2,
       answer,
-      options: [...wrongAnswers, answer].sort(() => Math.random() - 0.5)
+      options: [...wrongAnswers, answer].sort(() => Math.random() - 0.5),
     };
   };
 
@@ -92,14 +93,14 @@ const VisualAddition = () => {
       confetti({
         particleCount: 100,
         spread: 70,
-        origin: { y: 0.6 }
+        origin: { y: 0.6 },
       });
 
-      setScore(prev => prev + 100);
-      setStreak(prev => prev + 1);
+      setScore((prev) => prev + 100);
+      setStreak((prev) => prev + 1);
       setFeedback({
-        type: 'success',
-        message: '🎉 Wonderful job! Keep going!'
+        type: "success",
+        message: "🎉 Wonderful job! Keep going!",
       });
 
       // Generate new problem after a short delay
@@ -111,8 +112,8 @@ const VisualAddition = () => {
     } else {
       setStreak(0);
       setFeedback({
-        type: 'error',
-        message: 'Try again! You can do it! 💪'
+        type: "error",
+        message: "Try again! You can do it! 💪",
       });
     }
   };
@@ -126,43 +127,54 @@ const VisualAddition = () => {
         sx={{
           p: 4,
           borderRadius: 4,
-          background: 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)',
-          position: 'relative',
-          overflow: 'hidden'
+          background: "linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
         {/* Score Display */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
-          <Typography variant="h5" sx={{ fontFamily: 'Fredoka One' }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
+          <Typography variant="h5" sx={{ fontFamily: "Fredoka One" }}>
             Score: {score}
           </Typography>
-          <Typography variant="h5" sx={{ fontFamily: 'Fredoka One' }}>
+          <Typography variant="h5" sx={{ fontFamily: "Fredoka One" }}>
             {streak} 🔥
           </Typography>
         </Box>
 
         {/* Problem Display */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h4" sx={{ mb: 4, fontFamily: 'Fredoka One' }}>
+        <Box sx={{ textAlign: "center", mb: 6 }}>
+          <Typography variant="h4" sx={{ mb: 4, fontFamily: "Fredoka One" }}>
             How many {currentObject.name}s are there in total?
           </Typography>
 
           {/* First Group */}
           <Box sx={{ mb: 4 }}>
             {[...Array(problem.num1)].map((_, i) => (
-              <VisualObject key={`group1-${i}`} emoji={currentObject.emoji} delay={i} />
+              <VisualObject
+                key={`group1-${i}`}
+                emoji={currentObject.emoji}
+                delay={i}
+              />
             ))}
           </Box>
 
           {/* Plus Sign */}
-          <Typography variant="h2" sx={{ mb: 4, fontFamily: 'Fredoka One', color: 'primary.main' }}>
+          <Typography
+            variant="h2"
+            sx={{ mb: 4, fontFamily: "Fredoka One", color: "primary.main" }}
+          >
             +
           </Typography>
 
           {/* Second Group */}
           <Box sx={{ mb: 6 }}>
             {[...Array(problem.num2)].map((_, i) => (
-              <VisualObject key={`group2-${i}`} emoji={currentObject.emoji} delay={i + problem.num1} />
+              <VisualObject
+                key={`group2-${i}`}
+                emoji={currentObject.emoji}
+                delay={i + problem.num1}
+              />
             ))}
           </Box>
 
@@ -170,17 +182,22 @@ const VisualAddition = () => {
           <Grid container spacing={2} justifyContent="center">
             {problem.options.map((option, index) => (
               <Grid item key={option}>
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <Button
-                    variant={selectedAnswer === option ? "contained" : "outlined"}
+                    variant={
+                      selectedAnswer === option ? "contained" : "outlined"
+                    }
                     size="large"
                     onClick={() => handleAnswer(option)}
                     sx={{
-                      minWidth: '100px',
-                      minHeight: '100px',
-                      borderRadius: '20px',
-                      fontFamily: 'Fredoka One',
-                      fontSize: '2rem'
+                      minWidth: "100px",
+                      minHeight: "100px",
+                      borderRadius: "20px",
+                      fontFamily: "Fredoka One",
+                      fontSize: "2rem",
                     }}
                   >
                     {option}
@@ -203,12 +220,15 @@ const VisualAddition = () => {
                 sx={{
                   p: 2,
                   mt: 3,
-                  textAlign: 'center',
-                  bgcolor: feedback.type === 'success' ? 'success.light' : 'warning.light',
-                  color: 'white'
+                  textAlign: "center",
+                  bgcolor:
+                    feedback.type === "success"
+                      ? "success.light"
+                      : "warning.light",
+                  color: "white",
                 }}
               >
-                <Typography variant="h6" sx={{ fontFamily: 'Fredoka One' }}>
+                <Typography variant="h6" sx={{ fontFamily: "Fredoka One" }}>
                   {feedback.message}
                 </Typography>
               </Paper>
@@ -220,4 +240,4 @@ const VisualAddition = () => {
   );
 };
 
-export default VisualAddition; 
+export default VisualAddition;

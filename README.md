@@ -1,8 +1,30 @@
-# React + Vite
+# Mathly - Interactive Math Learning Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An innovative educational platform that makes learning mathematics fun and interactive through visual representations and gamification.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Visual Addition with animated objects
+- Visual Subtraction with interactive elements
+- Fraction Explorer with multiple visualization methods
+- SpeedMath for quick calculations
+- Progress tracking and scoring system
+- Interactive feedback and celebrations
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+Created by Patrick Navarre
+
+## Contributing
+
+Contributions are welcome! Feel free to submit pull requests or open issues for any improvements or bug fixes.
+
+## Acknowledgments
+
+- Built with React and Material-UI
+- Animations powered by Framer Motion
+- Celebration effects using Canvas Confetti
