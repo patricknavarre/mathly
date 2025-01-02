@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2024 Patrick Navarre
+ *
+ * This source code is licensed under the MIT License - see the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import { useState, useEffect } from "react";
 import {
   Box,
